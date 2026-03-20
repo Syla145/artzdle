@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctordle DE - Tägliches Mediziner-Rätsel</title>
+    <style>
+        :root { --bg-blue: #f0f7ff; --hint-blue: #d1e9ff; --text-dark: #2c3e50; --accent-brown: #5d4037; --success: #27ae60; --error: #c0392b; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-blue); margin: 0; color: var(--text-dark); }
+        
+        nav { width: 100%; background: #fff; border-bottom: 1px solid #d1d9e0; padding: 15px 0; display: flex; justify-content: center; gap: 40px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        nav a { text-decoration: none; color: #666; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        nav a:hover { color: var(--accent-brown); }
+
+        .container { max-width: 500px; margin: 40px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); text-align: center; }
+        .header-info { color: #888; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        h1 { margin: 10px 0 25px 0; font-size: 1.5rem; }
+
+        .hint-container { min-height: 300px; }
+        .hint-box { background: var(--hint-blue); border-radius: 10px; padding: 15px; margin-bottom: 12px; text-align: left; font-size: 0.95rem; line-height: 1.5; display: none; border-left: 5px solid #a5d8ff; animation: slideIn 0.4s ease-out; }
+        .hint-box.visible { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .input-area { position: relative; margin-top: 30px; display: flex; gap: 10px; }
+        input { flex: 1; padding: 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem; outline: none; transition: border 0.3s; }
+        input:focus { border-color: var(--accent-brown); }
+        
+        button#submit-btn { background: var(--accent-brown); color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button#submit-btn:hover { opacity: 0.9; }
+
+        /* Autocomplete */
+        .autocomplete-suggestions { position: absolute; top: 100%; left: 0; width: calc(100% - 100px); background: white; border: 1px solid #ddd; border-top: none; z-index: 100; max-height: 200px; overflow-y: auto; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .suggestion { padding: 12px; cursor: pointer; text-align: left; font-size: 0.9rem; }
+        .suggestion:hover { background: #f8f9fa; color: var(--accent-brown); }
+
+        #status-msg { margin-top: 20px; font-weight: bold; min-height: 24px; }
+        .section { display: none; }
+        .active { display: block; }
+        .archive-list { text-align: left; margin-top: 20px; }
+        .archive-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a onclick="showSection('play')">SPIELEN</a>
+    <a onclick="showSection('archive')">ARCHIV</a>
+    <a onclick="showSection('info')">INFO</a>
+</nav>
+
+<div class="container">
+    <!-- SPIEL -->
+    <div id="play" class="section active">
+        <div class="header-info" id="meta-info">DOCTORDLE #?? - DATUM</div>
+        <h1 id="main-title">Was ist die Diagnose?</h1>
+        <div id="hint-wrapper" class="hint-container"></div>
+        
+        <div class="input-area">
+            <input type="text" id="guess-input" placeholder="Diagnose suchen..." autocomplete="off">
+            <div id="suggestions" class="autocomplete-suggestions"></div>
+            <button id="submit-btn" onclick="checkAnswer()">SUBMIT</button>
+        </div>
+        <div id="status-msg"></div>
+    </div>
+
+    <!-- ARCHIV -->
+    <div id="archive" class="section">
+        <h1>Vergangene Fälle</h1>
+        <div id="archive-content" class="archive-list"></div>
+    </div>
+
+    <!-- INFO -->
+    <div id="info" class="section">
+        <h1>Über Doctordle DE</h1>
+        <p>Dieses Tool hilft Medizinstudierenden, ihr diagnostisches Wissen auf Deutsch zu trainieren.</p>
+        <p>Jeden Tag erscheint ein neuer klinischer Fall. Viel Erfolg!</p>
+        <p style="font-size: 0.8rem; color: #999;">Erstellt für eine angehende Ärztin.</p>
+    </div>
+</div>
+
+<script>
+    // --- DIE DIAGNOSEN-LISTE (500+ Begriffe möglich) ---
+    const allDiagnoses = [
+        "Abdominelles Aortenaneurysma", "Achalasie", "Adnexitis", "ADHS", "Aids", "Akute Leukämie", "Akute Pankreatitis", "Akutes Abdomen", "Akutes Nierenversagen", "Alkoholabhängigkeit", "Allergische Rhinitis", "Alzheimer-Krankheit", "Amyotrophe Lateralsklerose", "Anämie", "Anaphylaktischer Schock", "Aneurysma", "Angina Pectoris", "Anorexia nervosa", "Aortenklappenstenose", "Appendizitis", "Apoplex", "Arterielle Hypertonie", "Arteriose", "Arthrose", "Ascites", "Asthma Bronchiale", "Atopisches Ekzem", "Atypische Pneumonie", "Augeninnendruckerhöhung", "Autismus", "Bakterielle Vaginose", "Bandscheibenvorfall", "Barrett-Ösophagus", "Basaliom", "Bechterew-Krankheit", "Beckenbodenschwäche", "Belastungsinkontinenz", "Benigne Prostatahyperplasie", "Bipolar Affektive Störung", "Blasenentzündung", "Bluthochdruck", "Borderline-Persönlichkeitsstörung", "Borreliose", "Botulismus", "Bronchialkarzinom", "Bronchitis", "Bulimia nervosa", "Burnout-Syndrom", "Chlamydien-Infektion", "Cholangitis", "Cholezystitis", "Cholelithiasis", "Cholera", "Chorea Huntington", "Chronisch-venöse Insuffizienz", "Cluster-Kopfschmerz", "Colitis Ulcerosa", "COPD", "Coronare Herzkrankheit", "Creutzfeldt-Jakob-Krankheit", "Cushing-Syndrom", "Cystische Fibrose", "Darmverschluss", "Deep Vein Thrombosis", "Demenz", "Depression", "Dermatitis", "Diabetes Insipidus", "Diabetes Mellitus Typ 1", "Diabetes Mellitus Typ 2", "Diabetische Retinopathie", "Diphtherie", "Dissoziative Identitätsstörung", "Divertikulitis", "Down-Syndrom", "Dreitagesfieber", "Dumping-Syndrom", "Duodenalgeschwür", "Dysphagie", "Ebola", "Echinokokkose", "Eklampsie", "Ekzem", "Embolie", "Emphysem", "Endokarditis", "Endometriose", "Epilepsie", "Erysipel", "Erythema Nodosum", "Exanthem", "Extrasystole", "Fachwerk-Symptom", "Fettleber", "Fibromyalgie", "Frühsommer-Meningoenzephalitis", "Gallensteine", "Gastritis", "Gastroenteritis", "Gastroösophagealer Reflux", "Gebärmutterhalskrebs", "Gefäßentzündung", "Gelbfieber", "Generalisierte Angststörung", "Gicht", "Gliazellentumor", "Glaukom", "Gonorrhoe", "Gürtelrose", "Hämorrhoiden", "Harnwegsinfekt", "Haschisch-Intoxikation", "Hashimoto-Thyreoiditis", "Hautkrebs", "Hepatitis A", "Hepatitis B", "Hepatitis C", "Hernie", "Herzinfarkt", "Herzinsuffizienz", "Herzrhythmusstörung", "Heuschnupfen", "Hiatushernie", "Hirnanhautentzündung", "Hirnblutung", "Hirnödem", "HIV", "Hodgkin-Lymphom", "Hörsturz", "Huntington-Krankheit", "Hypercholesterinämie", "Hyperthyreose", "Hypothyreose", "Ileus", "Impetigo Contagiosa", "Influenza", "Insektenstichallergie", "Insomnie", "Ischiassyndrom", "Kalkschulter", "Karies", "Katarakt", "Keuchhusten", "Kieferhöhlenentzündung", "Klumpfuß", "Kohlenmonoxidvergiftung", "Kolonkarzinom", "Konjunktivitis", "Krampfadern", "Kreatininanstieg", "Kropf", "Lactoseintoleranz", "Laryngitis", "Legasthenie", "Legionärskrankheit", "Leishmaniose", "Leukämie", "Leberzirrhose", "Lichen Ruber Planus", "Lippenherpes", "Listeriose", "Lungenembolie", "Lungenemphysem", "Lungenentzündung", "Lungenfibrose", "Lupus Erythematodes", "Lyme-Borreliose", "Lymphom", "Magenkarzinom", "Magengeschwür", "Malaria", "Mammakarzinom", "Masern", "Mastitis", "Melanom", "Menière-Krankheit", "Meningitis", "Metabolisches Syndrom", "Migräne", "Milzbrand", "Mitralstenose", "Mononukleose", "Morbus Basedow", "Morbus Bechterew", "Morbus Crohn", "Morbus Cushing", "Morbus Hodgkin", "Morbus Meulengracht", "Morbus Parkinson", "Morbus Scheuermann", "Morbus Wilson", "Multiple Sklerose", "Mumps", "Myasthenia Gravis", "Myokardinfarkt", "Myokarditis", "Narkolepsie", "Nasennebenhöhlenentzündung", "Nesselsucht", "Neurodermitis", "Nierenbeckenentzündung", "Niereninsuffizienz", "Nierenzellkarzinom", "Norovirus", "Ödem", "Ovarialkarzinom", "Panikattacke", "Pankreaskarzinom", "Pankreatitis", "Parkinson", "Pfeiffersches Drüsenfieber", "Phlebenthrombose", "Phobie", "Plazenta Praevia", "Pneumonie", "Pneumothorax", "Poliomyelitis", "Polyzystisches Ovarialsyndrom", "Präeklampsie", "Presbyopie", "Priapismus", "Prostatakarzinom", "Psoriasis", "Lungenödem", "Querschnittslähmung", "Rachitis", "Refluxkrankheit", "Reizdarmsyndrom", "Retinoblastom", "Rhesus-Inkompatibilität", "Rheumatisches Fieber", "Rheumatoide Arthritis", "Röteln", "Salmonellose", "Sarkoidose", "Scharlach", "Schilddrüsenunterfunktion", "Schizophrenie", "Schlafapnoe", "Schlaganfall", "Schüttellähmung", "Skoliose", "Sodbrennen", "Somatisierungsstörung", "Spina Bifida", "Syphilis", "Systemischer Lupus Erythematodes", "Tachykardie", "Tetanus", "Thrombose", "Tinnitus", "Tollwut", "Tonsillitis", "Toxoplasmose", "Trigeminusneuralgie", "Tuberkulose", "Typhus", "Ulcus Cruris", "Ulcus Ventriculi", "Urtikaria", "Vaginalmykose", "Varikosis", "Vaskulitis", "Vogelgrippe", "Vorhofflimmern", "Wundrose", "Zöliakie", "Zwangsstörung", "Zystitis"
+    ].sort();
+
+    // --- DIE RÄTSEL-DATENBANK ---
+    const puzzles = [
+        { id: 1, date: "2026-03-18", solution: "Appendizitis", hints: ["24-jähriger Patient mit kolikartigen Schmerzen im Oberbauch.", "Schmerzwanderung in den rechten Unterbauch.", "Appetitlosigkeit und leichte Übelkeit.", "Loslassschmerz im rechten Unterbauch positiv.", "Leukozytose und erhöhtes CRP im Labor.", "Häufigste Ursache für ein akutes Abdomen."] },
+        { id: 2, date: "2026-03-19", solution: "Herzinfarkt", hints: ["62-jähriger Patient mit retrosternalem Druckgefühl.", "Schmerzausstrahlung in den linken Kieferwinkel.", "Kaltschweißigkeit und Todesangst.", "Symptome bessern sich nicht unter Nitro-Spray.", "ST-Streckenhebung in II, III, aVF.", "Troponin-T Test ist positiv."] },
+        { id: 3, date: "2026-03-20", solution: "Kohlenmonoxidvergiftung", hints: ["16-jährige Patientin mit Kopfschmerz und Schwindel.", "Vorausgegangen: Aufenthalt in einem Raum mit Kamin.", "Auffallend kirschrote Hautfarbe.", "Sauerstoffsättigung im Standard-Pulsoxy normal.", "Blutgas zeigt erhöhtes CO-Hb.", "Therapie: 100% Sauerstoff oder Druckkammer."] }
+    ];
+
+    let currentPuzzleIndex = 0;
+    let revealedCount = 1;
+
+    // --- LOGIK ---
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'archive') renderArchive();
+    }
+
+    function loadDaily() {
+        const today = new Date().toISOString().split('T')[0]; // "2026-03-20"
+        let puzzle = puzzles.find(p => p.date === today);
+        if(!puzzle) puzzle = puzzles[puzzles.length - 1]; // Falls kein Datum passt, nimm das letzte
+        initGame(puzzle);
+    }
+
+    function initGame(puzzle) {
+        revealedCount = 1;
+        document.getElementById('meta-info').innerText = `DOCTORDLE #${puzzle.id} - ${puzzle.date}`;
+        document.getElementById('status-msg').innerText = "";
+        document.getElementById('guess-input').value = "";
+        
+        const wrapper = document.getElementById('hint-wrapper');
+        wrapper.innerHTML = "";
+        puzzle.hints.forEach((h, i) => {
+            const div = document.createElement('div');
+            div.className = `hint-box ${i === 0 ? 'visible' : ''}`;
+            div.id = `h-${i}`;
+            div.innerText = `${i+1}. Hinweis: ${h}`;
+            wrapper.appendChild(div);
+        });
+        currentPuzzleIndex = puzzles.indexOf(puzzle);
+    }
+
+    function checkAnswer() {
+        const input = document.getElementById('guess-input');
+        const guess = input.value.trim().toLowerCase();
+        const solution = puzzles[currentPuzzleIndex].solution.toLowerCase();
+        const msg = document.getElementById('status-msg');
+
+        if(guess === solution) {
+            msg.innerText = "Richtig! Hervorragende Diagnose. 🩺";
+            msg.style.color = "var(--success)";
+            // Zeige alle Hinweise
+            for(let i=0; i<6; i++) {
+                let el = document.getElementById(`h-${i}`);
+                if(el) el.classList.add('visible');
+            }
+        } else {
+            if(revealedCount < puzzles[currentPuzzleIndex].hints.length) {
+                document.getElementById(`h-${revealedCount}`).classList.add('visible');
+                revealedCount++;
+                msg.innerText = "Falsch! Ein weiterer Hinweis wurde freigeschaltet.";
+                msg.style.color = "orange";
+            } else {
+                msg.innerText = `Leider nicht richtig. Die Lösung war: ${puzzles[currentPuzzleIndex].solution}`;
+                msg.style.color = "var(--error)";
+            }
+        }
+        input.value = "";
+    }
+
+    // --- AUTOCOMPLETE LOGIK ---
+    const input = document.getElementById('guess-input');
+    const suggBox = document.getElementById('suggestions');
+
+    input.addEventListener('input', () => {
+        const val = input.value.toLowerCase();
+        suggBox.innerHTML = "";
+        if(!val) return;
+
+        const matches = allDiagnoses.filter(d => d.toLowerCase().includes(val)).slice(0, 8);
+        matches.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'suggestion';
+            div.innerText = m;
+            div.onclick = () => {
+                input.value = m;
+                suggBox.innerHTML = "";
+            };
+            suggBox.appendChild(div);
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if(e.target !== input) suggBox.innerHTML = "";
+    });
+
+    function renderArchive() {
+        const cont = document.getElementById('archive-content');
+        cont.innerHTML = "";
+        puzzles.forEach(p => {
+            const div = document.createElement('div');
+            div.className = "archive-item";
+            div.innerHTML = `<span>#${p.id} - ${p.date}</span><button id="submit-btn" style="padding:5px 10px" onclick="initGameById(${p.id})">Spielen</button>`;
+            cont.appendChild(div);
+        });
+    }
+
+    function initGameById(id) {
+        const p = puzzles.find(x => x.id === id);
+        initGame(p);
+        showSection('play');
+    }
+
+    loadDaily();
+</script>
+</body>
+</html>
