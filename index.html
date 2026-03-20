@@ -101,86 +101,639 @@
 
     // --- DIE RÄTSEL-DATENBANK ---
     const puzzles = [
-        { id: 1, date: '2026-01-01', solution: 'Gichtanfall', hints: ['55-jähriger Mann mit akutem nächtlichem Schmerz im großen Zeh.', 'Rötung, Schwellung und extreme Berührungsempfindlichkeit des Grundgelenks.', 'Vorausgegangen: Üppiges Abendessen mit Fleisch und reichlich Bier.', 'Labor zeigt Hyperurikämie.', 'Punktion zeigt negativ doppelbrechende Kristalle.', 'Häufigste kristallinduzierte Arthritis.'] },
-  { id: 2, date: '2026-01-02', solution: 'Cholezystitis', hints: ['45-jährige Frau mit kolikartigen Schmerzen im rechten Oberbauch.', 'Schmerzausstrahlung in die rechte Schulter.', 'Positives Murphy-Zeichen bei der Palpation.', 'Leichte Erhöhung von CRP und Leukozyten.', 'Sonographie zeigt verdickte Gallenblasenwand mit Dreischichtung.', 'Oft assoziiert mit dem 6-F-Score (fair, fat, female...).'] },
-  { id: 3, date: '2026-01-03', solution: 'Morbus Parkinson', hints: ['68-jähriger Patient mit einseitigem Ruhetremor.', 'Zunehmende Steifigkeit der Muskulatur (Rigor).', 'Verlangsamung der Bewegungsabläufe (Bradykinese).', 'Pillendreher-Zittern und maskenhaftes Gesicht.', 'Ansprechen auf L-Dopa-Gabe.', 'Degeneration dopaminerger Neurone in der Substantia nigra.'] },
-  { id: 4, date: '2026-01-04', solution: 'Borreliose', hints: ['30-jährige Patientin mit kreisförmiger Hautrötung am Bein.', 'Zunehmende Ausbreitung der Rötung mit zentraler Aufhellung.', 'Grippeähnliche Symptome wie Gliederschmerzen und Fieber.', 'Vorausgegangen: Waldspaziergang vor 2 Wochen.', 'Erythema chronicum migrans ist der Fachbegriff.', 'Überträger ist meist Ixodes ricinus (Holzbock).'] },
-  { id: 5, date: '2026-01-05', solution: 'Hyperthyreose', hints: ['40-jährige Frau mit Herzrasen und Gewichtsverlust.', 'Händezittern, vermehrtes Schwitzen und Wärmeintoleranz.', 'Hervortreten der Augäpfel (Exophthalmus).', 'TSH-Wert ist supprimiert (sehr niedrig).', 'Nachweis von TSH-Rezeptor-Autoantikörpern (TRAK).', 'Häufigste Ursache ist der Morbus Basedow.'] },
-  { id: 6, date: '2026-01-06', solution: 'Colitis ulcerosa', hints: ['25-jähriger Patient mit blutig-schleimigen Durchfällen.', 'Bis zu 15 Defäkationen pro Tag und Tenesmen.', 'Bauchschmerzen meist im linken Unterbauch.', 'Endoskopisch kontinuierliche Ausbreitung vom Rektum aus.', 'Histologisch zeigt sich eine Kryptenabszessbildung.', 'Befällt ausschließlich die Mukosa und Submukosa des Kolons.'] },
-  { id: 7, date: '2026-01-07', solution: 'Glaukom', hints: ['72-jährige Patientin mit Sehstörungen (Regenbogenfarben um Lichter).', 'Zunehmende Gesichtsfeldausfälle (Skotome).', 'Harter Augapfel bei Palpation.', 'Erhöhter Augeninnendruck über 21 mmHg.', 'Excavation der Sehnervenpapille sichtbar.', 'Umgangssprachlich als Grüner Star bekannt.'] },
-  { id: 8, date: '2026-01-08', solution: 'Erysipel', hints: ['50-jähriger Mann mit scharf begrenzter, flammender Rötung im Gesicht.', 'Hohes Fieber und Schüttelfrost.', 'Zungenförmige Ausläufer der Rötung.', 'Eintrittspforte oft eine kleine Hautverletzung (Rhagade).', 'Infektion der oberen Hautschichten durch Streptokokken.', 'Behandlung erfolgt meist mit Penicillin G.'] },
-  { id: 9, date: '2026-01-09', solution: 'Herzinsuffizienz', hints: ['75-jähriger Patient mit Atemnot bei Belastung.', 'Nächtliches Aufschrecken wegen Luftnot (Orthopnoe).', 'Schwellungen an den Knöcheln (Ödeme).', 'Nykturie (nächtliches Wasserlassen).', 'Erhöhte Werte für NT-proBNP im Blut.', 'Stauungsorgane wie Leber und Lunge sind oft betroffen.'] },
-  { id: 10, date: '2026-01-10', solution: 'Pankreatitis', hints: ['50-jährige Patientin mit gürtelförmigen Schmerzen im Oberbauch.', 'Prall-elastisches Abdomen (Gummibauch).', 'Übelkeit und massives Erbrechen.', 'Vorausgegangen: Bekanntes Gallensteinleiden.', 'Lipase-Wert ist um das Dreifache erhöht.', 'Gummibauch ist ein klassisches klinisches Zeichen.'] },
-  { id: 11, date: '2026-01-11', solution: 'Pneumonie', hints: ['60-jähriger Patient mit Husten, Auswurf und Fieber.', 'Schmerzen beim Atmen auf der rechten Seite.', 'Feinblasige Rasselgeräusche bei der Auskultation.', 'Verschattung im Röntgen-Thorax (Infiltrat).', 'Erhöhtes Procalcitonin im Labor.', 'Häufigster Erreger: Streptococcus pneumoniae.'] },
-  { id: 12, date: '2026-01-12', solution: 'Lungenembolie', hints: ['45-jährige Frau mit plötzlicher Atemnot nach Langstreckenflug.', 'Stechender Schmerz im Brustkorb.', 'Tachykardie und leichte Zyanose.', 'D-Dimere im Blut sind positiv.', 'CT-Angiographie zeigt einen Gefäßverschluss.', 'Entsteht meist aus einer tiefen Beinvenenthrombose.'] },
-  { id: 13, date: '2026-01-13', solution: 'Appendizitis', hints: ['12-jähriges Kind mit Schmerzen um den Bauchnabel.', 'Schmerzwanderung in den rechten Unterbauch.', 'Abwehrspannung und Loslassschmerz (Blumberg-Zeichen).', 'Leukozytose und Temperaturdifferenz (rektal-axial).', 'Sonographisch Target-Phänomen des Wurmfortsatzes.', 'Umgangssprachlich oft fälschlich als Blinddarmentzündung bezeichnet.'] },
-  { id: 14, date: '2026-01-14', solution: 'Diabetes mellitus Typ 1', hints: ['8-jähriges Kind mit starkem Durst (Polydipsie).', 'Zunehmende Müdigkeit und Gewichtsverlust.', 'Häufiges Wasserlassen (Polyurie).', 'Azetongeruch der Atemluft.', 'Nachweis von Glutamatdecarboxylase-Antikörpern (GAD-AK).', 'Absoluter Insulinmangel durch Zerstörung der B-Zellen.'] },
-  { id: 15, date: '2026-01-15', solution: 'Meningitis', hints: ['20-jährige Studentin mit hohem Fieber und Nackensteifigkeit.', 'Starke Lichtempfindlichkeit (Photophobie).', 'Positives Kernig- und Brudzinski-Zeichen.', 'Petechien (Punktblutungen) bei schwerem Verlauf.', 'Liquorpunktion zeigt hohe Zellzahl (Pleozytose).', 'Meningismus ist das Leitsymptom.'] },
-  { id: 16, date: '2026-01-16', solution: 'Mononukleose', hints: ['17-jähriger Patient mit Halsschmerzen und Lymphknotenschwellung.', 'Ausgeprägte Müdigkeit und Abgeschlagenheit.', 'Grau-weiße Beläge auf den Tonsillen.', 'Splenomegalie (Milzvergrößerung) in der Sonographie.', 'Nachweis von Epstein-Barr-Virus-Antikörpern.', 'Umgangssprachlich "Kissing Disease".'] },
-  { id: 17, date: '2026-01-17', solution: 'Nephrolithiasis', hints: ['40-jähriger Mann mit wellenförmigen Flankenschmerzen.', 'Schmerzausstrahlung in die Leistengegend.', 'Patient ist sehr unruhig und wandert umher.', 'Mikrohämaturie im Urinstix.', 'Sonographie zeigt gestautes Nierenbecken.', 'Oft durch Kalziumoxalat-Kristalle verursacht.'] },
-  { id: 18, date: '2026-01-18', solution: 'Asthma bronchiale', hints: ['25-jährige Frau mit anfallsartiger Atemnot.', 'Exspiratorischer Stridor (Pfeifen beim Ausatmen).', 'Trockener Reizhusten, oft nachts.', 'Ansprechen auf inhalative Beta-2-Sympathomimetika.', 'Eosinophilie im Sputum oder Blut.', 'Überempfindlichkeit des Bronchialsystems.'] },
-  { id: 19, date: '2026-01-19', solution: 'Morbus Crohn', hints: ['30-jähriger Mann mit krampfartigen Schmerzen im rechten Unterbauch.', 'Häufige, eher unblutige Durchfälle.', 'Fistelbildung im Analbereich.', 'Segmentaler Befall des gesamten Magen-Darm-Traktes.', 'Pflastersteinrelief in der Koloskopie.', 'Transmuraler Befall aller Wandschichten.'] },
-  { id: 20, date: '2026-01-20', solution: 'Epilepsie', hints: ['15-jähriger Junge mit plötzlichem Sturz und Muskelzuckungen.', 'Initialer Schrei und Zungenbiss.', 'Postiktale Verwirrtheit und Schläfrigkeit.', 'Einnässen während des Anfalls.', 'Spikes and Waves im EEG.', 'Häufigster Anfallstyp: Generalisierter tonisch-klonischer Anfall.'] },
-  { id: 21, date: '2026-01-21', solution: 'Basaliom', hints: ['70-jährige Patientin mit einem knotigen Hautbefund im Gesicht.', 'Perlmuttartiger Glanz und Teleangiektasien am Rand.', 'Zentrale Ulzeration ("Ulcus rodens").', 'Vorausgegangen: Jahrelange Sonnenexposition.', 'Wird auch als "weißer Hautkrebs" bezeichnet.', 'Setzt fast nie Metastasen, wächst aber lokal destruierend.'] },
-  { id: 22, date: '2026-01-22', solution: 'Eisenmangelanämie', hints: ['35-jährige Frau mit Blässe und ständiger Müdigkeit.', 'Brüchige Nägel und Mundwinkelrhagaden.', 'Zungenbrennen (Hunter-Glossitis).', 'Labor: Niedriges Hämoglobin und niedriges Ferritin.', 'Hypochrome, mikrozytäre Erythrozyten.', 'Häufigste Form der Blutarmut weltweit.'] },
-  { id: 23, date: '2026-01-23', solution: 'COPD', hints: ['65-jähriger langjähriger Raucher mit chronischem Husten.', 'Atemnot, zunächst nur bei Belastung.', "AHA-Symptomatik (Auswurf, Husten, Atemnot).", 'Lungenfunktion zeigt Obstruktion (FEV1 erniedrigt).', 'Fassthorax in der körperlichen Untersuchung.', 'Wird oft durch Tabakrauch verursacht.'] },
-  { id: 24, date: '2026-01-24', solution: 'Schlaganfall', hints: ['72-jähriger Patient mit plötzlicher hängender Mundwinkel.', 'Einseitige Lähmung des Arms (Hemiparese).', 'Sprachstörungen (Aphasie).', 'FAST-Test zur Schnelldiagnostik.', 'CT zeigt meist eine Ischämie oder Blutung.', 'Wichtigster Faktor: Time is brain!'] },
-  { id: 25, date: '2026-01-25', solution: 'Divertikulitis', hints: ['60-jähriger Patient mit Schmerzen im linken Unterbauch.', 'Fieber und Stuhlunregelmäßigkeiten.', 'Schmerzhafter Walzenbefund tastbar.', 'Wird oft als "Links-Appendizitis" bezeichnet.', 'Entzündung von Ausstülpungen der Dickdarmwand.', 'Diagnostik der Wahl ist das Abdomen-CT.'] },
-  { id: 26, date: '2026-01-26', solution: 'Zöliakie', hints: ['3-jähriges Kind mit aufgeblähtem Bauch und Gedeihstörung.', 'Übelriechende, fettige Durchfälle (Steatorrhö).', 'Eisenmangel trotz ausreichender Ernährung.', 'Nachweis von Transglutaminase-Antikörpern.', 'Zottenatrophie in der Dünndarmbiopsie.', 'Lebenslange glutenfreie Diät notwendig.'] },
-  { id: 27, date: '2026-01-27', solution: 'Scharlach', hints: ['6-jähriges Kind mit Halsschmerzen und hohem Fieber.', 'Feinfleckiges Exanthem am Körperstamm.', 'Periorale Blässe (Milchbart).', 'Zunächst belegte Zunge, später "Himbeerzunge".', 'Verursacht durch Beta-hämolysierende Streptokokken der Gruppe A.', 'Therapie meist mit Penicillin V.'] },
-  { id: 28, date: '2026-01-28', solution: 'Morbus Bechterew', hints: ['28-jähriger Mann mit tiefsitzendem Rückenschmerz am Morgen.', 'Besserung der Schmerzen bei Bewegung.', 'Zunehmende Einsteifung der Wirbelsäule.', 'Starke Assoziation mit HLA-B27.', 'Röntgen zeigt "Bambusstab-Struktur".', 'Fachbegriff: Spondylitis ankylosans.'] },
-  { id: 29, date: '2026-01-29', solution: 'Hashimoto-Thyreoiditis', hints: ['40-jährige Frau mit Müdigkeit und Kälteempfindlichkeit.', 'Zunahme des Körpergewichts trotz mäßiger Ernährung.', 'Antriebslosigkeit und trockene Haut.', 'Nachweis von TPO-Antikörpern.', 'Sonographisch echoarmes Gewebe der Schilddrüse.', 'Häufigste Ursache einer Hypothyreose.'] },
-  { id: 30, date: '2026-01-30', solution: 'Sarkoidose', hints: ['35-jährige Patientin mit Reizhusten und Hautknötchen.', 'Bilateraler Lymphknotenbefall an der Lungenwurzel (Bihiläre Lymphadenopathie).', 'Erhöhtes ACE im Serum.', 'Löfgren-Syndrom als akute Verlaufsform.', 'Nicht-verkäsende Granulome in der Histologie.', 'Systemische Erkrankung des Bindegewebes mit Granulombildung.'] },
-  { id: 31, date: '2026-01-31', solution: 'Myasthenia gravis', hints: ['45-jährige Frau mit belastungsabhängiger Muskelschwäche.', 'Zunehmendes Herabhängen der Augenlider am Abend (Ptosis).', 'Doppelbilder beim Fernsehen.', 'Nachweis von Acetylcholinrezeptor-Antikörpern.', 'Positiver Simpson-Test.', 'Störung der neuromuskulären Übertragung.'] },
-  { id: 32, date: '2026-02-01', solution: 'Cushing-Syndrom', hints: ['50-jährige Patientin mit Vollmondgesicht.', 'Stammfettsucht mit dünnen Extremitäten.', 'Rötliche Dehnungsstreifen (Striae rubrae) am Bauch.', 'Bluthochdruck und Hyperglykämie.', 'Erhöhtes Cortisol im 24h-Urin.', 'Oft durch langjährige Glukokortikoid-Therapie verursacht.'] },
-  { id: 33, date: '2026-02-02', solution: 'Morbus Addison', hints: ['40-jähriger Patient mit extremer Schwäche und niedrigem Blutdruck.', 'Auffallende Dunkelfärbung der Haut (Hyperpigmentierung).', 'Verlangen nach salzigen Speisen.', 'Erniedrigte Natrium- und erhöhte Kaliumwerte.', 'Mangel an Nebennierenrindenhormonen.', 'Gilt als lebensbedrohliche Krise bei Infekten.'] },
-  { id: 34, date: '2026-02-03', solution: 'Hodgkin-Lymphom', hints: ['25-jähriger Mann mit schmerzloser Lymphknotenschwellung am Hals.', 'Alkoholschmerz in den betroffenen Lymphknoten.', 'Nachtschweiß, Fieber und Gewichtsverlust (B-Symptomatik).', 'Pruritus (Juckreiz) am ganzen Körper.', 'Nachweis von Reed-Sternberg-Riesenzellen.', 'Häufigste Lymphomform bei jungen Erwachsenen.'] },
-  { id: 35, date: '2026-02-04', solution: 'Zystische Fibrose', hints: ['5-jähriger Junge mit chronischem Husten und rezidivierenden Infekten.', 'Gedeihstörung und fettige Stühle.', 'Schmeckt salzig beim Küssen der Stirn.', 'Positiver Schweißtest (Chloridkonzentration erhöht).', 'Defekt im CFTR-Gen.', 'Zäher Schleim verstopft Lunge und Pankreas.'] },
-  { id: 36, date: '2026-02-05', solution: 'Mallory-Weiss-Syndrom', hints: ['35-jähriger Patient mit Bluterbrechen nach heftigem Würgen.', 'Vorausgegangen: Starker Alkoholkonsum.', 'Schleimhauteinrisse am ösophagogastralen Übergang.', 'Blut ist meist hellrot.', 'Endoskopische Diagnose erforderlich.', 'Oft konservative Therapie ausreichend.'] },
-  { id: 37, date: '2026-02-06', solution: 'Ösophagusvarizen', hints: ['55-jähriger Patient mit Leberzirrhose und schwallartigem Bluterbrechen.', 'Melaena (Teerstuhl) als Folgezeichen.', 'Hämodynamische Instabilität.', 'Entstehen durch portalen Hochdruck.', 'Endoskopisch sichtbare Venenaussackungen in der Speiseröhre.', 'Behandlung durch Gummibandligatur.'] },
-  { id: 38, date: '2026-02-07', solution: 'Pylorusstenose', hints: ['6 Wochen alter Säugling mit schwallartigem Erbrechen nach dem Trinken.', 'Erbrochenes ist nicht gallig.', 'Sichtbare Magenperistaltik im Oberbauch.', 'Elektrolytstörung: Hypochlorämische Alkalose.', 'Sonographisch Muskelverdickung am Magenausgang.', 'Tritt bevorzugt bei männlichen Erstgeborenen auf.'] },
-  { id: 39, date: '2026-02-08', solution: 'Mesenterialinfarkt', hints: ['75-jähriger Patient mit Vorhofflimmern und akuten Bauchschmerzen.', 'Initialer Vernichtungsschmerz, dann symptomfreies Intervall.', 'Später Zeichen des akuten Abdomens.', '"Angina abdominalis" in der Vorgeschichte.', 'Laktatwert im Blut deutlich erhöht.', 'Akuter Verschluss der Darmarterien.'] },
-  { id: 40, date: '2026-02-09', solution: 'Leberzirrhose', hints: ['60-jähriger Patient mit Aszites und Ikterus.', 'Spinnwebartige Gefäßzeichnungen auf der Haut (Spider Naevi).', 'Rote Handflächen (Palmarerythem).', 'Gynäkomastie und Verlust der Bauchbehaarung.', 'Synthesestörung: Albumin und Gerinnungsfaktoren niedrig.', 'Irreversibler Umbau des Lebergewebes.'] },
-  { id: 41, date: '2026-02-10', solution: 'Wilson-Krankheit', hints: ['22-jähriger Patient mit Tremor und Leberfunktionsstörung.', 'Kayser-Fleischer-Kornealring im Auge sichtbar.', 'Erniedrigtes Coeruloplasmin im Serum.', 'Genetisch bedingte Kupferstoffwechselstörung.', 'Ablagerung von Kupfer im Gehirn und Leber.', 'Therapie mit Chelatbildnern wie D-Penicillamin.'] },
-  { id: 42, date: '2026-02-11', solution: 'Hämochromatose', hints: ['50-jähriger Mann mit Gelenkschmerzen und "Bronzediabetes".', 'Lebervergrößerung und Kardiomyopathie.', 'Sehr hoher Ferritinwert und Transferrinsättigung.', 'Mutation im HFE-Gen.', 'Übermäßige Eisenaufnahme im Darm.', 'Therapie erfolgt durch regelmäßige Aderlässe.'] },
-  { id: 43, date: '2026-02-12', solution: 'HELLP-Syndrom', hints: ['28-jährige Schwangere mit starken Schmerzen im rechten Oberbauch.', 'Zunahme von Blutdruck und Eiweiß im Urin.', 'Abfall der Thrombozytenzahl.', 'Erhöhte Leberwerte und Hämolysezeichen.', 'Schwere Komplikation der Präeklampsie.', 'Sofortige Entbindung meist notwendig.'] },
-  { id: 44, date: '2026-02-13', solution: 'Extrauteringravidität', hints: ['25-jährige Frau mit einseitigen Unterbauchschmerzen und Schmierblutung.', 'Amenorrhö seit 6 Wochen.', 'HCG-Wert ist positiv, aber Uterus ist im US leer.', 'Oft im Eileiter lokalisiert (Tubargravidität).', 'Gefahr der Ruptur mit inneren Blutungen.', 'Akutes Abdomen bei Tubarruptur.'] },
-  { id: 45, date: '2026-02-14', solution: 'Endometriose', hints: ['30-jährige Frau mit sehr schmerzhafter Menstruation (Dysmenorrhö).', 'Chronische Unterbauchschmerzen und unerfüllter Kinderwunsch.', 'Schmerzen beim Geschlechtsverkehr (Dyspareunie).', 'Zyklusabhängige Beschwerden.', 'Wucherung von Gebärmutterschleimhaut außerhalb des Uterus.', 'Häufigste gutartige Erkrankung bei Frauen im gebärfähigen Alter.'] },
-  { id: 46, date: '2026-02-15', solution: 'Hodentorsion', hints: ['14-jähriger Junge mit plötzlichem, extremem Hodenschmerz.', 'Hoden steht hoch und ist geschwollen.', 'Negatives Prehn-Zeichen (Anheben lindert Schmerz nicht).', 'Fehlender Kremasterreflex.', 'Notfall: OP innerhalb von 6 Stunden erforderlich.', 'Verdrehung des Samenschnurs.'] },
-  { id: 47, date: '2026-02-16', solution: 'Nephrotisches Syndrom', hints: ['50-jährige Patientin mit massiven Lidödemen am Morgen.', 'Starke schäumender Urin.', 'Eiweißverlust über den Urin > 3,5 g/Tag.', 'Hypalbuminämie und Hyperlipidämie im Blut.', 'Oft im Rahmen eines Diabetes mellitus.', 'Klassische Trias: Ödeme, Proteinurie, Hypoproteinämie.'] },
-  { id: 48, date: '2026-02-17', solution: 'Rhabdomyolyse', hints: ['30-jähriger Sportler nach Extrembelastung mit Muskelschmerzen.', 'Dunkelbrauner Urin ("cola-farben").', 'Massiv erhöhte Creatinkinase (CK) im Blut.', 'Nachweis von Myoglobin im Urin.', 'Gefahr des akuten Nierenversagens.', 'Zerfall von Skelettmuskelzellen.'] },
-  { id: 49, date: '2026-02-18', solution: 'Dermatomyositis', hints: ['55-jährige Frau mit Muskelschwäche und Hautveränderungen.', 'Lila-rote Verfärbung der Augenlider (Heliotropes Exanthem).', 'Gottron-Papeln über den Fingergelenken.', 'Erhöhte CK-Werte und Myositis-spezifische Antikörper.', 'Oft als paraneoplastisches Syndrom bei Tumoren.', 'Symmetrische Schwäche der proximalen Muskulatur.'] },
-  { id: 50, date: '2026-02-19', solution: 'Pemphigus vulgaris', hints: ['60-jähriger Patient mit schlaffen Blasen auf der Haut.', 'Blasen platzen leicht und hinterlassen Erosionen.', 'Befall der Mundschleimhaut oft als Erstmanifestation.', 'Positives Nikolski-Zeichen I.', 'Autoantikörper gegen Desmoglein 3.', 'Intraepidermale Blasenbildung durch Akantholyse.'] },
-  { id: 51, date: '2026-02-20', solution: 'Skabies', hints: ['20-jähriger Student mit starkem Juckreiz, besonders nachts.', 'Feine, rötliche Gänge in den Fingerzwischenräumen.', 'Befall von Brustwarzen und Genitalbereich.', 'Ansteckung durch engen Hautkontakt.', 'Verursacht durch Krätzmilben.', 'Therapie mit Permethrin-Creme.'] },
-  { id: 52, date: '2026-02-21', solution: 'Erysipeloid', hints: ['40-jähriger Metzger mit schmerzhafter Rötung an der Hand.', 'Dunkelrote bis livide Verfärbung ohne Eiter.', 'Vorausgegangen: Verletzung bei der Fleischverarbeitung.', 'Verursacht durch Erysipelothrix rhusiopathiae.', 'Auch als "Schweinerotlauf" bekannt.', 'Behandlung meist mit Penicillin.'] },
-  { id: 53, date: '2026-02-22', solution: 'Porphyria cutanea tarda', hints: ['50-jähriger Mann mit Blasenbildung an den Handrücken nach Sonne.', 'Vermehrte Behaarung an den Schläfen (Hypertrichose).', 'Dunkelfärbung des Urins bei Lichteinwirkung.', 'Oft assoziiert mit Leberschäden oder Alkohol.', 'Störung der Häm-Biosynthese.', 'Häufigste Form der Porphyrien.'] },
-  { id: 54, date: '2026-02-23', solution: 'Favismus', hints: ['10-jähriger Junge mit Gelbsucht nach Verzehr von Saubohnen.', 'Akute hämolytische Anämie.', 'X-chromosomal vererbter Enzymdefekt.', 'Mangel an Glucose-6-Phosphat-Dehydrogenase.', 'Heinz-Innenkörperchen im Blutausstrich.', 'Bestimmte Medikamente (z.B. Primaquin) lösen Krisen aus.'] },
-  { id: 55, date: '2026-02-24', solution: 'Aortitis', hints: ['75-jährige Frau mit Schläfenkopfschmerz und Sehstörungen.', 'Schmerzen beim Kauen (Claudicatio masseterica).', 'Stark erhöhte BSG (Sturzkopfsenkung).', 'Assoziiert mit Polymyalgia rheumatica.', 'Gefahr der Erblindung ohne Steroidtherapie.', 'Riesenzellarteriitis ist die Ursache.'] },
-  { id: 56, date: '2026-02-25', solution: 'Morbus Osler', hints: ['40-jährige Patientin mit rezidivierendem Nasenbluten.', 'Punktförmige Gefäßerweiterungen an Lippen und Zunge.', 'Familiäres Auftreten der Symptome.', 'Arteriovenöse Malformationen in der Lunge möglich.', 'Fachbegriff: Hereditäre hämorrhagische Teleangiektasie.', 'Autosomal-dominant vererbte Gefäßerkrankung.'] },
-  { id: 57, date: '2026-02-26', solution: 'Churg-Strauss-Syndrom', hints: ['45-jähriger Mann mit schwerem Asthma und Bluteosinophilie.', 'Vaskulitis kleiner Gefäße.', 'Nachweis von pANCA im Blut.', 'Befall von Lunge, Herz und Nervensystem.', 'Auch als eosinophile Granulomatose mit Polyangiitis bekannt.', 'Granulomatöse Entzündung.'] },
-  { id: 58, date: '2026-02-27', solution: 'Wegener-Granulomatose', hints: ['50-jähriger Patient mit blutigem Schnupfen und chronischer Sinusitis.', 'Husten und Hämoptyse (Bluthusten).', 'Nierenbeteiligung (Glomerulonephritis).', 'Nachweis von cANCA im Serum.', 'Sattelnase als Spätfolge.', 'Granulomatose mit Polyangiitis (GPA).'] },
-  { id: 59, date: '2026-02-28', solution: 'Takayasu-Arteriitis', hints: ['25-jährige Frau mit abgeschwächtem Puls an einem Arm.', 'Schwindel und Sehstörungen.', 'Entzündung der Aorta und ihrer Hauptäste.', 'Wird auch als "Pulseless Disease" bezeichnet.', 'Meist bei Frauen asiatischer Herkunft.', 'Diagnose durch Angiographie.'] },
-  { id: 60, date: '2026-03-01', solution: 'Kawasaki-Syndrom', hints: ['3-jähriges Kind mit hohem Fieber über 5 Tage.', 'Nicht-eitrige Konjunktivitis und Erdbeerzunge.', 'Rötung und Schwellung von Hand- und Fußflächen.', 'Gefahr von Koronararterien-Aneurysmen.', 'Therapie mit Immunglobulinen und ASS.', 'Akute systemische Vaskulitis im Kindesalter.'] },
-  { id: 61, date: '2026-03-02', solution: 'Raynaud-Syndrom', hints: ['30-jährige Frau mit plötzlich weiß werdenden Fingern bei Kälte.', 'Anschließende Blaufärbung und dann schmerzhafte Rötung.', 'Klassische Trikolore-Phänomen.', 'Spasmus der Fingerschlagadern.', 'Primäre Form meist harmlos.', 'Sekundär oft bei Sklerodermie.'] },
-  { id: 62, date: '2026-03-03', solution: 'Sklerodermie', hints: ['45-jährige Frau mit maskenhaftem Gesicht und kleiner Mundöffnung.', 'Verhärtung der Haut an den Fingern (Sklerodaktylie).', 'Schluckbeschwerden und Lungenfibrose.', 'Anti-Scl-70 oder Antizentromer-Antikörper.', 'CREST-Syndrom als Unterform.', 'Systemische Sklerose.'] },
-  { id: 63, date: '2026-03-04', solution: 'Sjögren-Syndrom', hints: ['50-jährige Patientin mit extrem trockenen Augen und Mund.', 'Sandkorngefühl in den Augen.', 'Zunahme von Karies durch fehlenden Speichel.', 'Nachweis von SS-A (Ro) und SS-B (La) Antikörpern.', 'Positiver Schirmer-Test.', 'Chronische Entzündung der exokrinen Drüsen.'] },
-  { id: 64, date: '2026-03-05', solution: 'Lupus erythematodes', hints: ['25-jährige Frau mit Schmetterlingserythem im Gesicht.', 'Gelenkschmerzen und Lichtempfindlichkeit der Haut.', 'Nierenbeteiligung (Lupusnephritis).', 'Nachweis von ANA und Anti-dsDNA-Antikörpern.', 'Systemische Autoimmunerkrankung.', 'Oft erniedrigte Komplementwerte (C3, C4).'] },
-  { id: 65, date: '2026-03-06', solution: 'Antiphospholipid-Syndrom', hints: ['35-jährige Frau mit rezidivierenden Fehlgeburten.', 'Vorausgegangen: Tiefe Beinvenenthrombose.', 'Verlängerte PTT, aber Thromboseneigung.', 'Nachweis von Lupus-Antikoagulans oder Anticardiolipin-AK.', 'Thromboembolische Ereignisse bei jungen Patienten.', 'Wird oft mit ASS und Heparin behandelt.'] },
-  { id: 66, date: '2026-03-07', solution: 'Osteoporose', hints: ['75-jährige Frau mit Rundrücken (Witwenbuckel).', 'Abnahme der Körpergröße um 5 cm.', 'Wirbelkörperfraktur ohne adäquates Trauma.', 'Knochendichtemessung (DXA) T-Score < -2,5.', 'Mangel an Kalzium und Vitamin D.', 'Postmenopausaler Knochenschwund.'] },
-  { id: 67, date: '2026-03-08', solution: 'Osteomalazie', hints: ['60-jähriger Patient mit diffusen Knochenschmerzen und Muskelschwäche.', 'Watschelgang und Knochenverformungen.', 'Vitamin-D-Mangel als Ursache.', 'Bei Kindern wird die Erkrankung Rachitis genannt.', 'Looser-Umbauzonen im Röntgenbild.', 'Störung der Knochenmineralisation.'] },
-  { id: 68, date: '2026-03-09', solution: 'Morbus Paget', hints: ['70-jähriger Mann mit zunehmendem Kopfumfang (Hut passt nicht mehr).', 'Knochenschmerzen und Hörverlust.', 'Deformierungen der langen Röhrenknochen.', 'Massiv erhöhte Alkalische Phosphatase (AP).', 'Gesteigerter Knochenumbau.', 'Osteodystrophia deformans.'] },
-  { id: 69, date: '2026-03-10', solution: 'Osteosarkom', hints: ['16-jähriger Junge mit Schmerzen im Knie, besonders nachts.', 'Schwellung oberhalb des Gelenks.', 'Röntgen zeigt "Codman-Dreieck" oder "Sunburst-Phänomen".', 'Häufigster primärer maligner Knochentumor.', 'Tritt meist in der Metaphyse langer Röhrenknochen auf.', 'Metastasiert frühzeitig in die Lunge.'] },
-  { id: 70, date: '2026-03-11', solution: 'Dupuytren-Kontraktur', hints: ['55-jähriger Mann mit Knotenbildung in der Hohlhand.', 'Zunehmende Beugestellung des Ringfingers.', 'Finger kann nicht mehr flach aufgelegt werden.', 'Gutartige Wucherung der Palmaraponeurose.', 'Oft assoziiert mit Diabetes oder Alkoholkonsum.', 'Häufig bei Männern nordeuropäischer Herkunft.'] },
-  { id: 71, date: '2026-03-12', solution: 'Karpaltunnelsyndrom', hints: ['45-jährige Frau mit nächtlichem Einschlafen der Hände.', 'Schmerzen im Bereich von Daumen, Zeigefinger und Mittelfinger.', 'Ausschütteln der Hände bringt Besserung.', 'Atrophie des Daumenballens (Thenarmuskulatur).', 'Positives Hoffmann-Tinel-Zeichen.', 'Kompression des Nervus medianus.'] },
-  { id: 72, date: '2026-03-13', solution: 'Neuroblastom', hints: ['2-jähriges Kind mit tastbarem Tumor im Bauchraum.', "Hämatom um die Augen (Brillenhämatom).", 'Erhöhte Katecholamin-Abbauprodukte im Urin.', 'Häufigster solider Tumor des Kindesalters.', 'Geht meist vom Nebennierenmark aus.', 'Kann sich spontan zurückbilden.'] },
-  { id: 73, date: '2026-03-14', solution: 'Wilms-Tumor', hints: ['4-jähriges Kind mit schmerzloser Zunahme des Bauchumfangs.', 'Hämaturie und Bluthochdruck.', 'Glatt begrenzter Tumor in der Flanke.', 'Wird auch als Nephroblastom bezeichnet.', 'Gute Prognose bei frühzeitiger Therapie.', 'Häufigster bösartiger Nierentumor bei Kindern.'] },
-  { id: 74, date: '2026-03-15', solution: 'Hüftschnupfen', hints: ['5-jähriger Junge mit plötzlichem Hinken.', 'Schmerzen im Knie oder in der Leiste.', 'Vorausgegangen: Atemwegsinfekt vor 1-2 Wochen.', 'Sonographisch Erguss im Hüftgelenk.', 'Fachbegriff: Coxitis fugax.', 'Heilt meist innerhalb weniger Tage folgenlos ab.'] },
-  { id: 75, date: '2026-03-16', solution: 'Morbus Perthes', hints: ['6-jähriger Junge mit belastungsabhängigem Hinken.', 'Eingeschränkte Abduktion und Innenrotation der Hüfte.', 'Idiopathische aseptische Nekrose des Hüftkopfes.', 'Röntgen zeigt Verdichtung und Abflachung des Femurkopfes.', 'Langwieriger Verlauf über mehrere Jahre.', 'Durchblutungsstörung des Hüftkopfes.'] },
-  { id: 76, date: '2026-03-17', solution: 'Lungenembolie', hints: ['65-jährige Patientin nach Hüft-OP vor 5 Tagen.', 'Plötzliche Atemnot und stechender Schmerz beim Einatmen.', 'Tachykardie und Tachypnoe bei normalem Lungenklingeln.', 'Rechtsherzbelastung im EKG (S1Q3-Typ).', 'D-Dimere im Labor deutlich erhöht.', 'Goldstandard zur Diagnose ist das CT-Pulmonalisangiogramm.'] },
-  { id: 77, date: '2026-03-18', solution: 'Appendizitis', hints: ['22-jähriger Patient mit diffusen Oberbauchschmerzen.', 'Schmerzwanderung in den rechten Unterbauch nach 6 Stunden.', 'Übelkeit, Inappetenz und leichtes Fieber (rektal > axial).', 'Druckschmerz am McBurney-Punkt.', 'Psoas-Zeichen beim Heben des rechten Beines positiv.', 'Häufigste Ursache für das akute Abdomen in dieser Altersgruppe.'] },
-  { id: 78, date: '2026-03-19', solution: 'Herzinfarkt', hints: ['58-jähriger Patient, männlich, bekannter Diabetiker.', 'Akuter Druckschmerz hinter dem Brustbein ("Elefant auf der Brust").', 'Ausstrahlung in den linken Arm und Unterkiefer.', 'Begleitende Übelkeit und Kaltschweißigkeit.', 'ST-Strecken-Hebungen in den Ableitungen II, III und aVF.', 'Leitenzym-Erhöhung von Troponin T/I.'] },
-  { id: 79, date: '2026-03-20', solution: 'Kohlenmonoxidvergiftung', hints: ['16-jährige Patientin, bewusstseinsgetrübt aufgefunden.', 'Vorausgegangen: Aufenthalt in einem Raum mit defekter Gastherme.', 'Kopfschmerzen, Schwindel und Übelkeit bei den Angehörigen.', 'Auffallend kirschrote Färbung der Schleimhäute.', 'Pulsoxymetrie zeigt fälschlicherweise 100% Sättigung.', 'Therapie der Wahl ist die hyperbare Oxygenierung.'] }
-    ];
+  { id: 1, date: '2026-01-01', solution: 'Gichtanfall', hints: [
+    'Ein 55-jähriger Mann stellt sich nachts mit unerträglichen Schmerzen im rechten Fuß vor.',
+    'Er berichtet, dass die Schmerzen plötzlich begannen und er nicht einmal die Bettdecke auf dem Fuß ertragen kann.',
+    'Die Vitalzeichen sind unauffällig, bis auf eine leichte Tachykardie aufgrund der Schmerzen.',
+    'In der Anamnese gibt er ein üppiges Abendessen mit Steak und mehreren Litern Bier am Vorabend an.',
+    'Die körperliche Untersuchung zeigt eine massive Rötung, Schwellung und Überwärmung des Großzehengrundgelenks.',
+    'Eine Gelenkpunktion zeigt unter dem Polarisationsmikroskop negativ doppelbrechende, nadelförmige Kristalle.'
+  ]},
+  { id: 2, date: '2026-01-02', solution: 'Cholezystitis', hints: [
+    'Eine 45-jährige Patientin klagt über starke, krampfartige Schmerzen im rechten Oberbauch.',
+    'Sie berichtet, dass die Schmerzen nach dem Verzehr einer fettreichen Mahlzeit aufgetreten sind.',
+    'Die Vitalzeichen zeigen ein leichtes Fieber (38,2 °C) und einen normalen Blutdruck.',
+    'Die Patientin gibt an, dass der Schmerz gelegentlich bis in die rechte Schulter ausstrahlt.',
+    'Die Palpation des rechten Oberbauchs führt bei tiefer Inspiration zu einem plötzlichen Schmerzstopp.',
+    'Die Sonographie zeigt eine verdickte, dreigeschichtete Gallenblasenwand und ein positives sonographisches Murphy-Zeichen.'
+  ]},
+  { id: 3, date: '2026-01-03', solution: 'Morbus Parkinson', hints: [
+    'Ein 68-jähriger Mann wird von seiner Frau vorgestellt, weil er "langsamer geworden sei".',
+    'Er berichtet über Schwierigkeiten beim Knöpfen seines Hemdes und ein allgemeines Steifigkeitsgefühl.',
+    'Bei der Untersuchung fällt ein unwillkürliches Zittern der rechten Hand in Ruhe auf.',
+    'Die Anamnese ergibt, dass er in letzter Zeit häufiger gestürzt ist und ein sehr kleines Schriftbild entwickelt hat.',
+    'Die körperliche Untersuchung zeigt eine Armpendelreduktion beim Gehen und ein maskenhaftes Gesicht.',
+    'Die Gabe von L-Dopa führt zu einer prompten und deutlichen Verbesserung der motorischen Symptome.'
+  ]},
+  { id: 4, date: '2026-01-04', solution: 'Borreliose', hints: [
+    'Eine 30-jährige Frau präsentiert sich mit einer kreisförmigen Rötung am linken Oberschenkel.',
+    'Sie klagt zusätzlich über diffuse Gliederschmerzen und leichte Abgeschlagenheit.',
+    'Die Vitalzeichen sind im Normbereich, die Patientin wirkt jedoch leicht fiebrig.',
+    'Sie erinnert sich, vor etwa zwei Wochen beim Wandern im Schwarzwald einen Zeckenbiss bemerkt zu haben.',
+    'Die Hautrötung hat sich seit gestern nach außen ausgebreitet, während das Zentrum blasser wurde.',
+    'Das klinische Bild entspricht einem Erythema chronicum migrans im Stadium I der Infektion.'
+  ]},
+  { id: 5, date: '2026-01-05', solution: 'Hyperthyreose', hints: [
+    'Eine 40-jährige Frau berichtet über ungewollten Gewichtsverlust trotz gesteigertem Appetit.',
+    'Sie klagt über ständiges Herzjagen, innere Unruhe und eine ausgeprägte Wärmeintoleranz.',
+    'Die Vitalzeichen zeigen eine Ruhe-Tachykardie von 110 Schlägen pro Minute.',
+    'Die Patientin bemerkt, dass ihre Augen in letzter Zeit "prominenter" wirken und sie seltener blinzelt.',
+    'Die körperliche Untersuchung zeigt einen feinschlägigen Fingertremor und eine tastbare Struma.',
+    'Laboruntersuchungen bestätigen einen supprimierten TSH-Wert und deutlich erhöhte TRAK-Antikörper.'
+  ]},
+  { id: 6, date: '2026-01-06', solution: 'Colitis ulcerosa', hints: [
+    'Ein 25-jähriger Mann stellt sich mit blutigen Durchfällen und krampfartigen Bauchschmerzen vor.',
+    'Er berichtet über bis zu 15 Stuhlgänge am Tag, die oft nur aus kleinen Mengen Blut und Schleim bestehen.',
+    'Die Vitalzeichen offenbaren eine leichte Dehydratation und einen druckschmerzhaften linken Unterbauch.',
+    'Die Anamnese ist bis auf einen häufigen Stuhldrang (Tenesmen) unauffällig.',
+    'Die körperliche Untersuchung zeigt keine extraintestinalen Manifestationen wie Haut- oder Gelenkveränderungen.',
+    'Die Koloskopie zeigt eine kontinuierliche Entzündung vom Rektum aus mit Kontaktvulnerabilität der Schleimhaut.'
+  ]},
+  { id: 7, date: '2026-01-07', solution: 'Glaukomanfall', hints: [
+    'Eine 72-jährige Frau präsentiert sich mit stärksten Schmerzen im Bereich des linken Auges.',
+    'Sie klagt zusätzlich über Übelkeit, Erbrechen und sieht farbige Ringe um Lichtquellen.',
+    'Bei der Untersuchung wirkt die Patientin schwer krank; das betroffene Auge ist stark gerötet.',
+    'In der Anamnese gibt sie an, dass die Beschwerden in einem dunklen Kinoraum begannen.',
+    'Die Palpation des Auges zeigt einen steinharten Bulbus im Vergleich zur Gegenseite.',
+    'Die Spaltlampenuntersuchung offenbart eine mittelweite, entrundete und lichtstarre Pupille.'
+  ]},
+  { id: 8, date: '2026-01-08', solution: 'Erysipel', hints: [
+    'Ein 50-jähriger Mann stellt sich mit einer scharf begrenzten, leuchtend roten Hautveränderung am Unterschenkel vor.',
+    'Er leidet seit gestern unter hohem Fieber (39,5 °C) und ausgeprägtem Schüttelfrost.',
+    'Die Vitalzeichen bestätigen das Fieber und zeigen eine leichte Hypotonie.',
+    'Zwischen den Zehen des betroffenen Beins findet sich eine kleine, eingerissene Stelle (Mazeration).',
+    'Die Rötung ist glänzend, überwärmt und zeigt zungenförmige Ausläufer nach proximal.',
+    'Es handelt sich um eine bakterielle Infektion der oberen Hautschichten, meist durch Streptokokken.'
+  ]},
+  { id: 9, date: '2026-01-09', solution: 'Herzinsuffizienz', hints: [
+    'Ein 75-jähriger Patient klagt über zunehmende Atemnot bei körperlicher Belastung.',
+    'Er berichtet, dass er nachts mit mehreren Kissen hochgelagert schlafen muss, um Luft zu bekommen.',
+    'Die Untersuchung zeigt beidseitige Schwellungen im Bereich der Knöchel (Dellenbildung).',
+    'Der Patient gibt an, nachts häufig aufstehen zu müssen, um Wasser zu lassen.',
+    'Die Auskultation der Lunge offenbart beidseitig basale feuchte Rasselgeräusche.',
+    'Laborchemisch findet sich ein deutlich erhöhter Wert für NT-proBNP.'
+  ]},
+  { id: 10, date: '2026-01-10', solution: 'Pankreatitis', hints: [
+    'Eine 50-jährige Patientin stellt sich mit vernichtenden Oberbauchschmerzen vor.',
+    'Sie beschreibt den Schmerz als gürtelförmig in den Rücken ausstrahlend.',
+    'Vitalzeichen: Blutdruck 100/60 mmHg, Puls 115 bpm, Schweißausbrüche.',
+    'Die Patientin berichtet von Übelkeit und mehrfachem galligem Erbrechen.',
+    'Bei der Palpation ist das Abdomen prall-elastisch gespannt ("Gummibauch").',
+    'Laboruntersuchungen zeigen eine Serum-Lipase, die mehr als das Dreifache der Norm beträgt.'
+  ]},
+  { id: 11, date: '2026-01-11', solution: 'Pneumonie', hints: [
+    'Ein 60-jähriger Patient stellt sich mit produktivem Husten, gelblichem Auswurf und hohem Fieber vor.',
+    'Er klagt über einseitige Schmerzen beim tiefen Einatmen im rechten Brustkorb.',
+    'Auskultatorisch finden sich über dem rechten Unterlappen feinblasige Rasselgeräusche.',
+    'Die Atemfrequenz ist mit 24 Zügen pro Minute gesteigert.',
+    'Der Klopfschall über dem betroffenen Bereich ist gedämpft.',
+    'Das Röntgen-Thorax-Bild zeigt ein deutliches Infiltrat im rechten Unterlappen.'
+  ]},
+  { id: 12, date: '2026-01-12', solution: 'Lungenembolie', hints: [
+    'Eine 45-jährige Frau stellt sich mit akut aufgetretener Atemnot und stechendem Thoraxschmerz vor.',
+    'Die Symptome begannen unmittelbar nach einem 12-stündigen Interkontinentalflug.',
+    'Vitalzeichen: Tachykardie (120 bpm), Tachypnoe und eine Sauerstoffsättigung von 88% unter Raumluft.',
+    'In der Anamnese gibt sie an, seit einigen Tagen ein Spannungsgefühl in der linken Wade zu haben.',
+    'Die körperliche Untersuchung zeigt ein schmerzhaft geschwollenes linkes Bein.',
+    'Die CT-Angiographie der Lunge zeigt einen Kontrastmittelaussparung in den Pulmonalarterien.'
+  ]},
+  { id: 13, date: '2026-01-13', solution: 'Appendizitis', hints: [
+    'Ein 12-jähriger Junge wird mit Bauchschmerzen vorgestellt, die am Morgen um den Nabel begannen.',
+    'Jetzt gibt er an, dass der Schmerz tiefer gewandert ist und sich rechts unten befindet.',
+    'Das Kind wirkt appetitlos und hat einmalig erbrochen.',
+    'Vitalzeichen zeigen eine leichte Temperaturerhöhung von 38,1 °C.',
+    'Es besteht eine deutliche Abwehrspannung bei Druck auf den rechten Unterbauch.',
+    'Der Loslassschmerz im linken Unterbauch verursacht Schmerz auf der rechten Seite (Blumberg-Zeichen).'
+  ]},
+  { id: 14, date: '2026-01-14', solution: 'Diabetes mellitus Typ 1', hints: [
+    'Ein 8-jähriger Junge wird vorgestellt, weil er auffällig viel trinkt (bis zu 4 Liter am Tag).',
+    'Die Mutter berichtet, dass er nachts wieder ins Bett macht und deutlich an Gewicht verloren hat.',
+    'Das Kind wirkt müde und abgeschlagen, die Schleimhäute sind trocken.',
+    'Bei der Untersuchung fällt ein fruchtiger, süßlicher Geruch der Atemluft auf.',
+    'Die Anamnese ergibt keine Vorerkrankungen, jedoch einen viralen Infekt vor 4 Wochen.',
+    'Die Blutzuckermessung ergibt einen Wert von 450 mg/dl bei positivem Ketonnachweis im Urin.'
+  ]},
+  { id: 15, date: '2026-01-15', solution: 'Meningitis', hints: [
+    'Eine 20-jährige Studentin stellt sich mit hohem Fieber und extremen Kopfschmerzen vor.',
+    'Sie ist sehr lichtempfindlich und hält sich die Augen in dem hell beleuchteten Untersuchungszimmer zu.',
+    'Vitalzeichen: Temperatur 39,8 °C, Puls 110 bpm, Blutdruck stabil.',
+    'Versuche, das Kinn aktiv oder passiv auf die Brust zu senken, scheitern an starken Schmerzen (Meningismus).',
+    'An den Beinen zeigen sich kleine, nicht wegdrückbare rote Flecken (Petechien).',
+    'Die Lumbalpunktion zeigt einen trüben Liquor mit massiv erhöhter Zellzahl (Pleozytose).'
+  ]},
+  { id: 16, date: '2026-01-16', solution: 'Mononukleose', hints: [
+    'Ein 17-jähriger Patient klagt über Halsschmerzen, Fieber und geschwollene Lymphknoten.',
+    'Er berichtet über eine extreme Erschöpfung, die ihn seit über einer Woche ans Bett fesselt.',
+    'Die Untersuchung zeigt massiv vergrößerte Tonsillen mit grau-weißen Belägen.',
+    'Es finden sich schmerzhafte Lymphknotenschwellungen vor allem im hinteren Nackendreieck.',
+    'Bei der Palpation des Abdomens lässt sich die Milz unter dem Rippenbogen tasten.',
+    'Die Erkrankung wird durch das Epstein-Barr-Virus (EBV) verursacht.'
+  ]},
+  { id: 17, date: '2026-01-17', solution: 'Nephrolithiasis', hints: [
+    'Ein 40-jähriger Mann präsentiert sich mit wellenförmigen, extremen Flankenschmerzen.',
+    'Er kann während des Gesprächs nicht still sitzen und wandert unruhig im Zimmer umher.',
+    'Der Patient gibt an, dass der Schmerz bis in den Hoden ausstrahlt.',
+    'Vitalzeichen: Blutdruck 160/95 mmHg (schmerzbedingt), ansonsten stabil.',
+    'Der Urinstix zeigt eine deutliche Mikrohämaturie bei ansonsten unauffälligem Befund.',
+    'Die Sonographie zeigt eine Erweiterung des Nierenbeckenkelchsystems aufgrund eines Konkrements.'
+  ]},
+  { id: 18, date: '2026-01-18', solution: 'Asthma bronchiale', hints: [
+    'Eine 25-jährige Frau kommt mit akuter Atemnot und einem Engegefühl in der Brust in die Praxis.',
+    'Sie berichtet, dass die Beschwerden meist nachts oder beim Joggen auftreten.',
+    'Bei der Untersuchung hört man beim Ausatmen ein deutliches Pfeifen und Giemen.',
+    'Die Patientin gibt an, seit der Kindheit an Heuschnupfen und Neurodermitis zu leiden.',
+    'Die Lungenfunktionsprüfung zeigt eine reversible Obstruktion der Atemwege.',
+    'Die Inhalation eines kurzwirksamen Beta-2-Mimetikums führt zu einer sofortigen Besserung.'
+  ]},
+  { id: 19, date: '2026-01-19', solution: 'Morbus Crohn', hints: [
+    'Ein 30-jähriger Mann berichtet über chronische, krampfartige Bauchschmerzen und Durchfälle.',
+    'Er gibt an, in den letzten Monaten ungewollt 6 kg abgenommen zu haben.',
+    'Die körperliche Untersuchung zeigt eine schmerzhafte Walze im rechten Unterbauch.',
+    'Der Patient berichtet zusätzlich über schmerzhafte Hauteinrisse (Fissuren) am After.',
+    'Die Blutuntersuchung zeigt Zeichen einer chronischen Entzündung und einen Eisenmangel.',
+    'In der Ileokoloskopie findet sich ein segmentaler Befall mit einem sog. Pflastersteinrelief.'
+  ]},
+  { id: 20, date: '2026-01-20', solution: 'Epilepsie', hints: [
+    'Ein 15-jähriger Junge wird nach einem plötzlichen Sturz und Bewusstseinsverlust eingeliefert.',
+    'Augenzeugen berichten, dass sein Körper erst ganz steif wurde und dann rhythmisch zuckte.',
+    'Nach dem Ereignis war der Patient für ca. 20 Minuten verwirrt und schläfrig.',
+    'Die Untersuchung zeigt eine kleine Wunde an der seitlichen Zunge (Zungenbiss).',
+    'In der Anamnese gibt die Mutter an, dass er vor dem Sturz kurz aufgeschrien habe.',
+    'Das EEG zeigt typische hypersynchrone Entladungen (Spikes and Waves).'
+  ]},
+  { id: 21, date: '2026-01-21', solution: 'Basaliom', hints: [
+    'Eine 70-jährige Patientin stellt sich mit einer kleinen, nicht heilenden Hautstelle an der Nase vor.',
+    'Die Veränderung besteht seit Monaten und blutet gelegentlich bei leichter Berührung.',
+    'Bei der Untersuchung sieht man ein knötchenförmiges Gebilde mit perlmuttartigem Glanz.',
+    'Am Rand der Läsion finden sich feine, erweiterte Äderchen (Teleangiektasien).',
+    'Die Patientin gibt an, früher sehr viel Zeit in der Sonne verbracht zu haben.',
+    'Dieser Tumor bildet fast nie Metastasen, kann aber lokal Gewebe zerstören.'
+  ]},
+  { id: 22, date: '2026-01-22', solution: 'Eisenmangelanämie', hints: [
+    'Eine 35-jährige Frau klagt über ständige Müdigkeit, Kopfschmerzen und Konzentrationsschwäche.',
+    'Sie berichtet, dass ihre Haare spröde seien und sie öfter brennende Mundwinkel habe.',
+    'Bei der Untersuchung fallen eine ausgeprägte Blässe der Konjunktiven und Schleimhäute auf.',
+    'Die Patientin ernährt sich vegetarisch und berichtet über eine sehr starke Regelblutung.',
+    'An den Fingernägeln zeigen sich muldenartige Vertiefungen (Löffelnägel).',
+    'Das Blutbild zeigt mikrozytäre, hypochrome Erythrozyten und ein sehr niedriges Ferritin.'
+  ]},
+  { id: 23, date: '2026-01-23', solution: 'COPD', hints: [
+    'Ein 65-jähriger Mann stellt sich mit chronischem Husten und Auswurf am Morgen vor.',
+    'Er berichtet, dass er beim Treppensteigen schnell außer Atem kommt.',
+    'Die Untersuchung zeigt einen fassförmigen Brustkorb (Fassthorax) und eine Lippenbremse beim Atmen.',
+    'In der Anamnese gibt er an, seit seinem 16. Lebensjahr täglich eine Packung Zigaretten zu rauchen.',
+    'Die Auskultation der Lunge zeigt ein abgeschwächtes Atemgeräusch und trockenes Rasseln.',
+    'Die Lungenfunktion zeigt eine Obstruktion, die sich nach Bronchospasmolyse nicht normalisiert.'
+  ]},
+  { id: 24, date: '2026-01-24', solution: 'Schlaganfall', hints: [
+    'Ein 72-jähriger Mann entwickelt beim Frühstück eine plötzliche Schwäche im rechten Arm.',
+    'Die Ehefrau bemerkt, dass sein rechter Mundwinkel herunterhängt und er Schwierigkeiten beim Sprechen hat.',
+    'Vitalzeichen: Blutdruck 190/105 mmHg, Puls 90 bpm, Blutzucker normal.',
+    'Der Patient versucht zu antworten, findet aber nicht die richtigen Worte (Aphasie).',
+    'Er kann die Zunge nicht gerade herausstrecken; sie weicht zur geschwächten Seite ab.',
+    'Die bildgebende Diagnostik (CT/MRT) zeigt einen Ischämiebereich im Versorgungsgebiet der A. cerebri media.'
+  ]},
+  { id: 25, date: '2026-01-25', solution: 'Divertikulitis', hints: [
+    'Ein 60-jähriger Patient klagt über zunehmende Schmerzen im linken Unterbauch.',
+    'Er berichtet über wechselnde Stuhlgewohnheiten und ein allgemeines Krankheitsgefühl.',
+    'Vitalzeichen zeigen ein Fieber von 38,5 °C und eine leichte Tachykardie.',
+    'Bei der Palpation findet sich ein druckschmerzhafter Walzenbefund im linken Colonbereich.',
+    'In der Anamnese gibt der Patient eine ballaststoffarme Ernährung an.',
+    'Die Entzündung betrifft Ausstülpungen der Dickdarmwand, was oft als "Links-Appendizitis" bezeichnet wird.'
+  ]},
+  { id: 26, date: '2026-01-26', solution: 'Zöliakie', hints: [
+    'Ein 3-jähriges Mädchen wird mit einem stark aufgeblähten Bauch und dünnen Extremitäten vorgestellt.',
+    'Die Eltern berichten über übelriechende, glänzende und massige Stühle (Fettstühle).',
+    'Das Kind wirkt weinerlich, zeigt eine Gedeihstörung und liegt im Wachstum unter der Perzentile.',
+    'Die Symptome begannen einige Monate nach der Einführung von Getreidebrei in die Ernährung.',
+    'Laborchemisch finden sich Antikörper gegen Gewebstransglutaminase (tTG-AK).',
+    'Die Dünndarmbiopsie zeigt eine Zottenatrophie und Kryptenhyperplasie.'
+  ]},
+  { id: 27, date: '2026-01-27', solution: 'Scharlach', hints: [
+    'Ein 6-jähriger Junge wird mit Halsschmerzen, Schluckbeschwerden und hohem Fieber vorgestellt.',
+    'Die Untersuchung zeigt hochrote Gaumenbögen und vergrößerte, zerklüftete Tonsillen.',
+    'Auf dem Körperstamm zeigt sich ein feinfleckiges, blassrotes Exanthem, das sich wie Sandpapier anfühlt.',
+    'Auffällig ist eine Aussparung der Rötung um den Mund herum (periorale Blässe).',
+    'Die Zunge war anfangs weiß belegt, zeigt nun aber eine kräftige Rötung und hervortretende Papillen.',
+    'Die Erkrankung wird durch pyogene Toxine von A-Streptokokken ausgelöst.'
+  ]},
+  { id: 28, date: '2026-01-28', solution: 'Morbus Bechterew', hints: [
+    'Ein 28-jähriger Mann klagt über tiefsitzende Rückenschmerzen, die ihn nachts aufwecken.',
+    'Er berichtet, dass die Schmerzen am Morgen am schlimmsten sind und bei Bewegung besser werden.',
+    'Die Untersuchung zeigt eine eingeschränkte Beweglichkeit der Lendenwirbelsäule (Schober-Zeichen).',
+    'Der Patient gibt an, dass auch seine Fersen schmerzen (Enthesitis).',
+    'Im Röntgenbild der Ileosakralgelenke zeigen sich deutliche Entzündungszeichen (Sakroiliitis).',
+    'Es besteht eine sehr starke Korrelation mit dem Erbmerkmal HLA-B27.'
+  ]},
+  { id: 29, date: '2026-01-29', solution: 'Hashimoto-Thyreoiditis', hints: [
+    'Eine 40-jährige Frau klagt über Antriebslosigkeit, Kälteempfindlichkeit und Haarausfall.',
+    'Sie berichtet, dass sie trotz unveränderter Ernährung 5 kg an Gewicht zugenommen hat.',
+    'Bei der Untersuchung wirkt die Haut trocken und kühl; die Stimme klingt heiser.',
+    'Die Patientin klagt zusätzlich über eine chronische Verstopfung.',
+    'Die Sonographie der Schilddrüse zeigt ein inhomogenes, echoarmes Organ.',
+    'Laborchemisch findet sich ein erhöhtes TSH bei gleichzeitig hohen TPO-Antikörpern.'
+  ]},
+  { id: 30, date: '2026-01-30', solution: 'Sarkoidose', hints: [
+    'Eine 35-jährige Patientin stellt sich mit trockenem Reizhusten und leichter Atemnot vor.',
+    'Zusätzlich klagt sie über schmerzhafte rote Knötchen an den Schienbeinen (Erythema nodosum).',
+    'In der Anamnese gibt sie Gelenkschmerzen und ein allgemeines Schwächegefühl an.',
+    'Das Röntgenbild des Thorax zeigt eine beidseitige Lymphknotenvergrößerung an den Lungenwurzeln.',
+    'Die Laborwerte zeigen ein erhöhtes Angiotensin-Converting-Enzym (ACE).',
+    'Die Histologie zeigt nicht-verkäsende Granulome in den betroffenen Organen.'
+  ]},
+  { id: 31, date: '2026-01-31', solution: 'Myasthenia gravis', hints: [
+    'Eine 45-jährige Frau klagt über eine belastungsabhängige Muskelschwäche.',
+    'Sie berichtet, dass ihre Augenlider gegen Abend herabhängen und sie dann Doppelbilder sieht.',
+    'Nach einer Ruhepause oder am Morgen nach dem Aufstehen seien die Beschwerden fast verschwunden.',
+    'In der Untersuchung wird sie gebeten, lange nach oben zu schauen, wobei ein Lid langsam herabsinkt.',
+    'Es finden sich keine Sensibilitätsstörungen oder Schmerzen.',
+    'Die Ursache ist eine autoimmunbedingte Blockade der Acetylcholinrezeptoren an der motorischen Endplatte.'
+  ]},
+  { id: 32, date: '2026-02-01', solution: 'Cushing-Syndrom', hints: [
+    'Eine 50-jährige Frau stellt sich wegen einer deutlichen Veränderung ihres Aussehens vor.',
+    'Sie hat am Stamm stark zugenommen, während Arme und Beine auffallend dünn geworden sind.',
+    'Die Untersuchung zeigt ein rundes, gerötetes Gesicht ("Vollmondgesicht") und einen "Stiernacken".',
+    'Am Bauch finden sich breite, rötlich-violette Dehnungsstreifen (Striae rubrae).',
+    'Die Patientin berichtet über neu aufgetretenen Bluthochdruck und eine Muskelschwäche.',
+    'Laborchemisch findet sich ein deutlich erhöhtes freies Cortisol im 24-Stunden-Urin.'
+  ]},
+  { id: 33, date: '2026-02-02', solution: 'Morbus Addison', hints: [
+    'Ein 40-jähriger Patient stellt sich mit extremer Schwäche, Übelkeit und Gewichtsverlust vor.',
+    'Auffällig ist eine starke Dunkelfärbung der Haut, besonders an den Handfurchen und Schleimhäuten.',
+    'Vitalzeichen: Blutdruck 90/60 mmHg, Neigung zu orthostatischen Synkopen.',
+    'Der Patient gibt an, einen unbändigen Heißhunger auf salzige Speisen zu haben.',
+    'Laborchemisch zeigen sich eine Hyponatriämie und eine Hyperkaliämie.',
+    'Es handelt sich um eine primäre Nebennierenrindeninsuffizienz mit Mangel an Cortisol und Aldosteron.'
+  ]},
+  { id: 34, date: '2026-02-03', solution: 'Hodgkin-Lymphom', hints: [
+    'Ein 25-jähriger Mann bemerkt eine schmerzlose Schwellung links am Hals.',
+    'Er berichtet über nächtliches Schwitzen (Wäschewechsel nötig) und ungewollten Gewichtsverlust.',
+    'Auffallend ist ein starker Juckreiz am ganzen Körper ohne erkennbaren Ausschlag.',
+    'Der Patient gibt an, dass der Lymphknoten nach dem Genuss eines Glases Wein schmerzt.',
+    'In der Blutuntersuchung findet sich eine deutlich erhöhte Blutsenkungsgeschwindigkeit (BSG).',
+    'Die Lymphknotenbiopsie zeigt charakteristische Reed-Sternberg-Riesenzellen.'
+  ]},
+  { id: 35, date: '2026-02-04', solution: 'Zystische Fibrose', hints: [
+    'Ein 5-jähriger Junge leidet unter chronischem Husten und wiederkehrenden Lungenentzündungen.',
+    'Die Eltern berichten, dass er sehr viel isst, aber kaum an Gewicht zunimmt.',
+    'Der Stuhlgang wird als auffallend hell, fettig und sehr unangenehm riechend beschrieben.',
+    'In der Anamnese war bereits ein Darmverschluss unmittelbar nach der Geburt (Meconium-Ileus) auffällig.',
+    'Die Mutter erwähnt, dass die Haut des Kindes beim Küssen sehr salzig schmecke.',
+    'Der sog. Schweißtest zeigt eine pathologisch erhöhte Chloridkonzentration.'
+  ]},
+  { id: 36, date: '2026-02-05', solution: 'Mallory-Weiss-Syndrom', hints: [
+    'Ein 35-jähriger Patient wird nach dem Erbrechen von hellrotem Blut eingeliefert.',
+    'Er berichtet, dass er zuvor mehrfach heftig gewürgt habe, bevor das Blut auftrat.',
+    'Die Anamnese ergibt einen exzessiven Alkoholkonsum am Vorabend.',
+    'Der Patient klagt über brennende Schmerzen im Bereich des Mageneingangs.',
+    'Die Vitalzeichen sind stabil, es findet sich keine chronische Lebererkrankung.',
+    'In der Endoskopie zeigen sich longitudinale Schleimhautrisse am ösophagogastralen Übergang.'
+  ]},
+         { id: 37, date: '2026-02-06', solution: 'Ösophagusvarizen', hints: [
+    'Ein 55-jähriger Patient mit bekannter Leberzirrhose wird wegen schwallartigen Erbrechens von hellem Blut eingeliefert.',
+    'Er wirkt blass, kaltschweißig und zeigt Anzeichen eines beginnenden hämorrhagischen Schocks.',
+    'Vitalzeichen: Blutdruck 90/55 mmHg, Puls 125 bpm, Atemfrequenz gesteigert.',
+    'Die körperliche Untersuchung zeigt einen prallen Bauch mit sichtbarem Aszites und ein Caput medusae.',
+    'Der Patient berichtet, dass er in der Vergangenheit bereits mehrfach wegen portaler Hypertension behandelt wurde.',
+    'In der Notfall-Endoskopie zeigen sich blutende, prall gefüllte Venenaussackungen in der unteren Speiseröhre.'
+  ]},
+  { id: 38, date: '2026-02-07', solution: 'Pylorusstenose', hints: [
+    'Ein 6 Wochen alter männlicher Säugling wird wegen massiven Erbrechens nach jeder Stillmahlzeit vorgestellt.',
+    'Die Mutter berichtet, dass der Mageninhalt "im hohen Bogen" (schwallartig) herauskommt.',
+    'Das Kind wirkt sehr hungrig, ist aber dehydriert und zeigt eine mangelnde Gewichtszunahme.',
+    'Die Untersuchung zeigt eine sichtbare Magenperistaltik im Oberbauch nach dem Trinken.',
+    'Laborchemisch findet sich eine typische hypochlorämische Alkalose aufgrund des Säureverlusts.',
+    'In der Sonographie lässt sich ein deutlich verdickter Pylorusmuskel (Magenpförtner) darstellen.'
+  ]},
+  { id: 39, date: '2026-02-08', solution: 'Mesenterialinfarkt', hints: [
+    'Ein 75-jähriger Patient mit bekanntem Vorhofflimmern klagt über plötzlich einsetzende, vernichtende Bauchschmerzen.',
+    'Nach einer Stunde lässt der Schmerz merklich nach, der Patient wirkt jedoch weiterhin schwer krank.',
+    'Vitalzeichen: Tachykardie und eine beginnende metabolische Azidose im Labor.',
+    'Die körperliche Untersuchung zeigt ein überraschend weiches Abdomen ohne starke Abwehrspannung.',
+    'In der Vorgeschichte berichtet er über Schmerzen nach dem Essen ("Angina abdominalis").',
+    'Es handelt sich um einen akuten Verschluss der Arteria mesenterica superior, oft durch eine Embolie.'
+  ]},
+  { id: 40, date: '2026-02-09', solution: 'Leberzirrhose', hints: [
+    'Ein 60-jähriger Mann stellt sich mit einer gelblichen Verfärbung der Skleren und einem zunehmenden Bauchumfang vor.',
+    'Er berichtet über eine ausgeprägte Müdigkeit und einen starken Juckreiz am gesamten Körper.',
+    'Bei der Untersuchung fallen kleine rote Gefäßsternchen (Spider Naevi) im Gesicht und am Oberkörper auf.',
+    'Die Handflächen des Patienten sind auffallend rot (Palmarerythem) und die Bauchbehaarung fehlt.',
+    'Laborchemisch finden sich erniedrigte Albuminwerte und eine verlängerte Quick-Zeit (INR erhöht).',
+    'Das Endstadium dieser chronischen Lebererkrankung führt zu einem knotigen Umbau des Gewebes.'
+  ]},
+  { id: 41, date: '2026-02-10', solution: 'Wilson-Krankheit', hints: [
+    'Ein 22-jähriger Patient klagt über zitternde Hände und zunehmende Schwierigkeiten beim Sprechen.',
+    'Zusätzlich werden von den Angehörigen leichte Wesensveränderungen und Stimmungsschwankungen berichtet.',
+    'Die Laborwerte zeigen erhöhte Leberwerte (Transaminasen) bei einem erniedrigten Coeruloplasmin.',
+    'Bei der Untersuchung mit der Spaltlampe am Auge zeigt sich ein bräunlicher Ring am Hornhautrand.',
+    'Dieser sog. Kayser-Fleischer-Kornealring ist pathognomonisch für die Erkrankung.',
+    'Die Ursache ist eine genetisch bedingte Störung des Kupferstoffwechsels mit Ablagerungen im ZNS und in der Leber.'
+  ]},
+  { id: 42, date: '2026-02-11', solution: 'Hämochromatose', hints: [
+    'Ein 50-jähriger Mann stellt sich mit Gelenkschmerzen und einer auffälligen Graufärbung der Haut vor.',
+    'Er klagt über Müdigkeit und berichtet, dass vor Kurzem ein Diabetes mellitus diagnostiziert wurde.',
+    'In der Untersuchung findet sich eine vergrößerte, feste Leber und Anzeichen einer Herzschwäche.',
+    'Laboruntersuchungen zeigen eine massiv erhöhte Transferrinsättigung und einen Ferritinwert über 1000 ng/ml.',
+    'In der Familie des Patienten gab es bereits Fälle von Leberkrebs in jungem Alter.',
+    'Die "Eisenspeicherkrankheit" wird meist durch regelmäßige Aderlässe therapiert.'
+  ]},
+  { id: 43, date: '2026-02-12', solution: 'HELLP-Syndrom', hints: [
+    'Eine 28-jährige Schwangere in der 34. Woche klagt über starke Schmerzen im rechten Oberbauch ("Epigastralgie").',
+    'Sie berichtet zusätzlich über Kopfschmerzen und Sehstörungen in Form von Flimmern.',
+    'Vitalzeichen: Blutdruck 165/105 mmHg, Eiweißnachweis im Urinstix.',
+    'Die Laborwerte zeigen eine Hämolyse (LDH hoch), erhöhte Leberwerte und einen Abfall der Thrombozyten.',
+    'Die Patientin wirkt zunehmend unruhig; es besteht die Gefahr eines Eklampsie-Anfalls.',
+    'Dieses Akronym steht für Hemolysis, Elevated Liver enzymes und Low Platelet count.'
+  ]},
+  { id: 44, date: '2026-02-13', solution: 'Extrauteringravidität', hints: [
+    'Eine 25-jährige Frau stellt sich mit akuten, einseitigen Unterbauchschmerzen und Schmierblutungen vor.',
+    'Sie gibt an, dass ihre Periode seit etwa zwei Wochen überfällig ist.',
+    'Vitalzeichen: Leichte Tachykardie, Blutdruck noch stabil bei 110/70 mmHg.',
+    'Die gynäkologische Untersuchung zeigt einen schmerzhaften Adnextumor; im Ultraschall ist der Uterus leer.',
+    'Der Schwangerschaftstest im Urin (HCG) ist deutlich positiv.',
+    'Häufigste Lokalisation für diese Fehlimplantation ist die Tube (Eileiter).'
+  ]},
+  { id: 45, date: '2026-02-14', solution: 'Endometriose', hints: [
+    'Eine 30-jährige Frau berichtet über extrem schmerzhafte Regelblutungen, die sie jeden Monat arbeitsunfähig machen.',
+    'Sie klagt zusätzlich über Schmerzen beim Geschlechtsverkehr und einen bisher unerfüllten Kinderwunsch.',
+    'Die Patientin bemerkt gelegentlich Blutbeimengungen im Urin während ihrer Periode.',
+    'In der Untersuchung findet sich eine eingeschränkte Beweglichkeit des Uterus und Druckschmerzhaftigkeit.',
+    'Laparo-skopisch zeigen sich kleine dunkle Herde im kleinen Becken und am Bauchfell.',
+    'Es handelt sich um versprengte Gebärmutterschleimhaut außerhalb des Cavum uteri.'
+  ]},
+  { id: 46, date: '2026-02-15', solution: 'Hodentorsion', hints: [
+    'Ein 14-jähriger Junge wird nachts wegen plötzlich einsetzender, extremster Schmerzen im linken Hoden eingeliefert.',
+    'Er berichtet, dass er zusätzlich unter Übelkeit leidet und einmal erbrochen hat.',
+    'Die körperliche Untersuchung zeigt einen geschwollenen, hochstehenden und druckdolenten Hoden.',
+    'Das Anheben des Hodens führt zu keiner Schmerzlinderung (negatives Prehn-Zeichen).',
+    'Der Kremasterreflex auf der betroffenen Seite ist nicht auslösbar.',
+    'Dies ist ein urologischer Notfall; die operative Freilegung muss innerhalb von 6 Stunden erfolgen.'
+  ]},
+  { id: 47, date: '2026-02-16', solution: 'Nephrotisches Syndrom', hints: [
+    'Eine 50-jährige Patientin bemerkt seit Tagen stark geschwollene Augenlider am Morgen und dicke Knöchel am Abend.',
+    'Sie berichtet, dass ihr Urin auffallend schäumt, wenn sie die Toilette benutzt.',
+    'Vitalzeichen: Blutdruck 155/95 mmHg, ansonsten stabil.',
+    'Labor: Massiver Eiweißverlust im Urin (> 3,5 g/Tag) und ein erniedrigtes Serum-Albumin.',
+    'Zusätzlich findet sich eine deutliche Erhöhung der Blutfettwerte (Hyperlipidämie).',
+    'Die klassische Trias besteht aus Proteinurie, Hypoproteinämie und Ödemen.'
+  ]},
+  { id: 48, date: '2026-02-17', solution: 'Rhabdomyolyse', hints: [
+    'Ein 30-jähriger Marathonläufer klagt nach einem Wettkampf über extreme Muskelschmerzen und Schwäche.',
+    'Er bemerkt besorgt, dass sein Urin eine dunkelbraune Farbe (wie Cola) angenommen hat.',
+    'Vitalzeichen: Tachykardie, normale Körpertemperatur, reduzierte Urinausscheidung.',
+    'Die Laborwerte zeigen eine Creatinkinase (CK), die um das 50-fache der Norm erhöht ist.',
+    'Im Urinstix ist das Feld für Blut positiv, aber im Mikroskop finden sich keine Erythrozyten.',
+    'Der Zerfall von Skelettmuskelzellen führt zur Freisetzung von Myoglobin und drohendem Nierenversagen.'
+  ]},
+  { id: 49, date: '2026-02-18', solution: 'Dermatomyositis', hints: [
+    'Eine 55-jährige Frau klagt über eine zunehmende Schwäche der Oberschenkelmuskulatur beim Treppensteigen.',
+    'Sie bemerkt eine lila-rötliche Verfärbung der Augenlider und eine Schwellung um die Augen.',
+    'An den Fingergelenken zeigen sich rötliche, schuppende Erhabenheiten (Gottron-Papeln).',
+    'In der Anamnese gibt sie an, dass sie auch Schwierigkeiten habe, die Arme über den Kopf zu heben.',
+    'Die Laborchemie zeigt erhöhte Muskelenzyme (CK) und spezifische Jo-1-Antikörper.',
+    'Diese idiopathische entzündliche Myopathie kann oft als Paraneoplasie bei okkulten Tumoren auftreten.'
+  ]},
+  { id: 50, date: '2026-02-19', solution: 'Pemphigus vulgaris', hints: [
+    'Ein 60-jähriger Patient stellt sich mit schlaffen Blasen auf der Haut vor, die bei leichtem Druck platzen.',
+    'Er berichtet über schmerzhafte Wunden im Mund, die bereits vor den Hautveränderungen auftraten.',
+    'Die Untersuchung zeigt, dass man mit seitlichem Fingerdruck die oberste Hautschicht abschieben kann.',
+    'Dieses Phänomen wird als positives Nikolski-Zeichen I bezeichnet.',
+    'Die Histologie zeigt eine Spaltbildung innerhalb der Epidermis (Akantholyse).',
+    'Die Ursache sind Autoantikörper gegen Desmoglein 3, die den Zellzusammenhalt auflösen.'
+  ]},
+  { id: 51, date: '2026-02-20', solution: 'Skabies', hints: [
+    'Ein 20-jähriger Student klagt über einen unerträglichen Juckreiz am ganzen Körper, der nachts im Bett am schlimmsten ist.',
+    'Die Mitbewohner seiner WG fangen nun ebenfalls an, sich vermehrt zu kratzen.',
+    'Bei der Untersuchung finden sich feine, milchig-weiße Gänge in den Zwischenfingerräumen.',
+    'An den Handgelenken und am Penis zeigen sich kleine rötliche Papeln und Krusten.',
+    'Die Anamnese ergibt einen engen körperlichen Kontakt zu einer neuen Bekanntschaft vor 4 Wochen.',
+    'Die Verursacher sind Milben, die Gänge in die Hornschicht der Haut graben (Krätze).'
+  ]},
+  { id: 52, date: '2026-02-21', solution: 'Erysipeloid', hints: [
+    'Ein 40-jähriger Metzger stellt sich mit einer schmerzhaften, livide-roten Schwellung am Handrücken vor.',
+    'Er erinnert sich, sich vor drei Tagen beim Zerlegen von Schweinefleisch leicht verletzt zu haben.',
+    'Die Rötung ist scharf begrenzt, zeigt aber keinen Eiter und keine Lymphangitis.',
+    'Im Gegensatz zum Erysipel fehlen Fieber und Schüttelfrost; der Patient wirkt klinisch stabil.',
+    'Der Erreger ist Erysipelothrix rhusiopathiae, ein grampositives Stäbchen.',
+    'Die Erkrankung wird umgangssprachlich auch als "Schweinerotlauf" bezeichnet.'
+  ]},
+  { id: 53, date: '2026-02-22', solution: 'Porphyria cutanea tarda', hints: [
+    'Ein 50-jähriger Patient bemerkt die Bildung von Blasen und Krusten an den Handrücken nach Sonnenexposition.',
+    'Die Haut an diesen Stellen wirkt sehr verletzlich und heilt nur langsam unter Narbenbildung ab.',
+    'Er berichtet über einen chronischen Alkoholkonsum; in der Untersuchung zeigt sich eine Leberschädigung.',
+    'Auffällig ist eine vermehrte Behaarung im Bereich der Schläfen und Wangen (Hypertrichose).',
+    'Der Urin des Patienten zeigt unter UV-Licht eine rötliche Fluoreszenz.',
+    'Es liegt eine Störung der Häm-Biosynthese vor, meist durch einen Enzymdefekt in der Leber.'
+  ]},
+  { id: 54, date: '2026-02-23', solution: 'Favismus', hints: [
+    'Ein 10-jähriger Junge wird mit plötzlicher Blässe und Gelbsucht (Ikterus) in die Notaufnahme gebracht.',
+    'Die Eltern berichten, dass er am Vortag eine große Portion Saubohnen (Vicia faba) gegessen hat.',
+    'Vitalzeichen: Tachykardie, Urin ist auffallend dunkelbraun verfärbt.',
+    'Das Labor zeigt eine akute hämolytische Anämie mit erhöhtem indirektem Bilirubin.',
+    'Im Blutausstrich finden sich Erythrozyten mit sog. Heinz-Innenkörperchen.',
+    'Ursache ist ein X-chromosomal vererbter Mangel an Glucose-6-Phosphat-Dehydrogenase.'
+  ]},
+  { id: 55, date: '2026-02-24', solution: 'Riesenzellarteriitis', hints: [
+    'Eine 75-jährige Frau klagt über neu aufgetretene, bohrende Schmerzen in der rechten Schläfenregion.',
+    'Sie berichtet, dass sie beim Kauen von Fleisch Schmerzen im Kiefer bekommt und Pausen machen muss.',
+    'Vor zwei Tagen sah sie für einige Minuten "wie durch einen Nebel" auf dem rechten Auge.',
+    'Die körperliche Untersuchung zeigt eine verdickte, pulslose und druckempfindliche Arteria temporalis.',
+    'Die Blutsenkungsgeschwindigkeit (BSG) ist massiv erhöht (> 100 mm in der ersten Stunde).',
+    'Ohne sofortige Cortisontherapie droht eine dauerhafte Erblindung durch Ischämie des Sehnervs.'
+  ]},
+  { id: 56, date: '2026-02-25', solution: 'Morbus Osler', hints: [
+    'Eine 40-jährige Patientin stellt sich wegen seit der Jugend bestehendem, häufigem Nasenbluten vor.',
+    'An den Lippen, der Zunge und den Fingern finden sich stecknadelkopfgroße, rote Gefäßpünktchen.',
+    'Diese Pünktchen lassen sich mit einem Glasspatel wegdrücken (Teleangiektasien).',
+    'Die Patientin berichtet, dass ihr Vater ähnliche Hautveränderungen und ebenfalls Nasenbluten hatte.',
+    'Im Röntgen-Thorax finden sich Hinweise auf arteriovenöse Malformationen in der Lunge.',
+    'Diese autosomal-dominant vererbte Gefäßerkrankung wird auch als Rendu-Osler-Weber-Syndrom bezeichnet.'
+  ]},
+  { id: 57, date: '2026-02-26', solution: 'Churg-Strauss-Syndrom', hints: [
+    'Ein 45-jähriger Mann mit bekanntem, schwer einstellbarem Asthma klagt über Gefühlsstörungen in den Füßen.',
+    'Er berichtet über eine chronische Sinusitis und neu aufgetretene purpurfarbene Flecken an den Beinen.',
+    'Laborchemisch findet sich eine extreme Eosinophilie im Differentialblutbild (> 1500/µl).',
+    'Die Untersuchung der Nervenleitgeschwindigkeit bestätigt eine Mononeuritis multiplex.',
+    'In der Biopsie zeigen sich nekrotisierende Vaskulitis und eosinophile Granulome.',
+    'Die moderne Bezeichnung für dieses Krankheitsbild ist die eosinophile Granulomatose mit Polyangiitis (EGPA).'
+  ]},
+  { id: 58, date: '2026-02-27', solution: 'Wegener-Granulomatose', hints: [
+    'Ein 50-jähriger Patient klagt über blutigen Schnupfen und borkige Krusten in der Nase seit Wochen.',
+    'Zusätzlich besteht ein chronischer Husten mit blutigem Auswurf und eine allgemeine Schwäche.',
+    'Bei der Untersuchung fällt eine Einsenkung des Nasenrückens auf (sog. Sattelnase).',
+    'Die Nierenwerte (Kreatinin) steigen an, und im Urin finden sich Erythrozytenzylinder.',
+    'Laborchemisch findet sich ein hochspezifischer Nachweis von cANCA (PR3-Antikörper).',
+    'Die Erkrankung wird heute als Granulomatose mit Polyangiitis (GPA) bezeichnet.'
+  ]},
+  { id: 59, date: '2026-02-28', solution: 'Takayasu-Arteriitis', hints: [
+    'Eine 25-jährige Frau stellt sich mit Schwindel und einer kurzzeitigen Ohnmacht vor.',
+    'Bei der Vitalzeichenkontrolle fällt auf, dass am rechten Arm kein Puls tastbar ist.',
+    'Die Blutdruckmessung ergibt am linken Arm 140/90 mmHg, am rechten Arm ist kein Druck messbar.',
+    'Über der Karotis und der Bauchaorta sind auskultatorisch Strömungsgeräusche hörbar.',
+    'Die Patientin klagt zusätzlich über Schmerzen in den Armen bei körperlicher Betätigung.',
+    'Diese Großgefäßvaskulitis betrifft vorwiegend den Aortenbogen und seine Abgänge bei jungen Frauen.'
+  ]},
+  { id: 60, date: '2026-03-01', solution: 'Kawasaki-Syndrom', hints: [
+    'Ein 3-jähriger Junge leidet seit 6 Tagen an sehr hohem Fieber, das auf Antibiotika nicht anspricht.',
+    'Die Augen sind beidseitig gerötet, aber es findet sich kein Eiter (nicht-eitrige Konjunktivitis).',
+    'Die Lippen sind rot und rissig, die Zunge sieht aus wie eine Erdbeere ("Erdbeerzunge").',
+    'An den Handflächen und Fußsohlen zeigt sich eine Rötung und ein ödematöse Schwellung.',
+    'Es besteht eine schmerzlose Lymphknotenschwellung am Hals.',
+    'Wichtigste Komplikation dieser systemischen Vaskulitis sind Aneurysmen der Koronararterien.'
+  ]},
+  { id: 61, date: '2026-03-02', solution: 'Raynaud-Syndrom', hints: [
+    'Eine 30-jährige Frau berichtet, dass ihre Finger bei Kälte plötzlich "leichenblass" und gefühllos werden.',
+    'Nach einigen Minuten färben sich die Finger bläulich (Zyanose) und werden schließlich schmerzhaft rot.',
+    'Die Daumen sind von dieser Symptomatik meistens ausgespart.',
+    'Die Patientin beschreibt diesen Ablauf als sehr charakteristisches "Trikolore-Phänomen".',
+    'In der Anamnese finden sich keine Hinweise auf eine zugrunde liegende rheumatische Erkrankung.',
+    'Es handelt sich um krampfartige Gefäßverengungen der Fingerarterien (Vasospasmen).'
+  ]},
+  { id: 62, date: '2026-03-03', solution: 'Sklerodermie', hints: [
+    'Eine 45-jährige Frau klagt über eine zunehmende Versteifung der Haut an den Händen.',
+    'Die Finger lassen sich kaum noch strecken, die Haut wirkt glänzend und fest (Sklerodaktylie).',
+    'Das Gesicht wirkt starr, die Mundöffnung ist deutlich verkleinert und von Falten umgeben (Tabaksbeutelmund).',
+    'Die Patientin klagt zusätzlich über Sodbrennen und Schwierigkeiten beim Schlucken.',
+    'Im Labor finden sich spezifische Antikörper gegen Scl-70 oder Zentromere.',
+    'Die systemische Sklerose führt zu einer Fibrosierung von Haut und inneren Organen.'
+  ]},
+  { id: 63, date: '2026-03-04', solution: 'Sjögren-Syndrom', hints: [
+    'Eine 50-jährige Patientin klagt über ein ständiges Sandkorngefühl in den Augen und extreme Mundtrockenheit.',
+    'Sie berichtet, dass sie beim Essen immer trinken müsse, um trockene Speisen herunterschlucken zu können.',
+    'Aufgrund des fehlenden Speichels leidet sie trotz guter Pflege unter vermehrtem Karies.',
+    'Der Augenarzt stellt eine verminderte Tränenproduktion fest (Schirmer-Test positiv).',
+    'Laborchemisch finden sich SS-A (Ro) und SS-B (La) Antikörper.',
+    'Diese chronisch-entzündliche Autoimmunerkrankung betrifft vor allem exokrine Drüsen.'
+  ]},
+  { id: 64, date: '2026-03-05', solution: 'Lupus erythematodes', hints: [
+    'Eine 25-jährige Frau stellt sich mit einer scharf begrenzten Rötung über beiden Wangen und dem Nasenrücken vor.',
+    'Die Rötung verstärkt sich nach einem Aufenthalt in der Sonne (Photosensibilität).',
+    'Zusätzlich klagt sie über wandernde Gelenkschmerzen und ein allgemeines Krankheitsgefühl.',
+    'Im Urin findet sich eine beginnende Proteinurie als Zeichen einer Nierenbeteiligung.',
+    'Hochspezifisch für diese Erkrankung ist der Nachweis von Anti-dsDNA-Antikörpern.',
+    'Die Hautveränderung wird klassischerweise als "Schmetterlingserythem" bezeichnet.'
+  ]},
+  { id: 65, date: '2026-03-06', solution: 'Antiphospholipid-Syndrom', hints: [
+    'Eine 35-jährige Frau stellt sich nach der dritten Fehlgeburt in Folge zur weiteren Diagnostik vor.',
+    'In der Anamnese findet sich eine tiefe Beinvenenthrombose vor zwei Jahren ohne erkennbare Ursache.',
+    'Die Laboruntersuchung zeigt eine verlängerte PTT, was paradoxerweise mit einer Thromboseneigung einhergeht.',
+    'Es finden sich Antikörper gegen Cardiolipin oder ein positives Lupus-Antikoagulans.',
+    'Die Patientin zeigt zudem eine leichte Thrombozytopenie.',
+    'Diese Autoimmunerkrankung führt zu einer erhöhten Neigung für arterielle und venöse Thrombosen.'
+  ]},
+  { id: 66, date: '2026-03-07', solution: 'Osteoporose', hints: [
+    'Eine 75-jährige Patientin stellt sich vor, weil sie "immer kleiner werde" und einen Buckel entwickle.',
+    'Sie berichtet über dumpfe Rückenschmerzen, die bei Belastung zunehmen.',
+    'In der Untersuchung findet sich ein sog. Tannenbaum-Phänomen der Haut am Rücken durch den Höhenverlust.',
+    'Die Patientin erlitt vor einem Jahr einen Speichenbruch am Handgelenk nach einem harmlosen Sturz.',
+    'Die Knochendichtemessung (DXA) ergibt einen T-Score von -3,0.',
+    'Es handelt sich um eine Skeletterkrankung mit verminderter Knochenmasse und erhöhter Frakturgefahr.'
+  ]},
+  { id: 67, date: '2026-03-08', solution: 'Osteomalazie', hints: [
+    'Ein 60-jähriger Patient klagt über diffuse Knochenschmerzen und eine ausgeprägte Muskelschwäche.',
+    'Er berichtet über Schwierigkeiten beim Aufstehen aus dem Sessel und zeigt einen watschelnden Gang.',
+    'Laborchemisch finden sich ein erniedrigtes Kalzium und Phosphat bei deutlich erhöhtem Parathormon.',
+    'In der Röntgenaufnahme zeigen sich bandförmige Aufhellungen im Knochen (Looser-Umbauzonen).',
+    'Die Ursache ist meist ein schwerer Vitamin-D-Mangel im Erwachsenenalter.',
+    'Bei Kindern führt derselbe Mechanismus zum Krankheitsbild der Rachitis.'
+  ]},
+  { id: 68, date: '2026-03-09', solution: 'Morbus Paget', hints: [
+    'Ein 70-jähriger Mann bemerkt, dass ihm seine Hüte plötzlich zu klein geworden sind (Zunahme des Kopfumfangs).',
+    'Zusätzlich klagt er über dumpfe Knochenschmerzen im Bereich des Schienbeins und des Beckens.',
+    'Die Laboruntersuchung zeigt eine isolierte, massiv erhöhte Alkalische Phosphatase (AP).',
+    'Im Röntgenbild finden sich Bereiche mit gesteigertem Knochenumbau und Deformierungen.',
+    'Der Patient berichtet über ein neu aufgetretenes Hörproblem auf einer Seite.',
+    'Diese Erkrankung wird auch als Osteodystrophia deformans bezeichnet.'
+  ]},
+  { id: 69, date: '2026-03-10', solution: 'Osteosarkom', hints: [
+    'Ein 16-jähriger Junge klagt über zunehmende Schmerzen im rechten Knie, die vor allem nachts auftreten.',
+    'Die Schmerzen bessern sich nicht durch Schonung; es zeigt sich eine lokale Schwellung und Überwärmung.',
+    'Vitalzeichen sind stabil, aber die Alkalische Phosphatase (AP) im Serum ist erhöht.',
+    'Im Röntgenbild findet sich eine osteolytische Läsion mit Durchbau der Kortikalis ("Sunburst-Phänomen").',
+    'Zusätzlich zeigt sich ein sog. Codman-Dreieck durch die Abhebung des Periosts.',
+    'Dies ist der häufigste bösartige Knochentumor im Jugendalter; er metastasiert frühzeitig in die Lunge.'
+  ]},
+  { id: 70, date: '2026-03-11', solution: 'Dupuytren-Kontraktur', hints: [
+    'Ein 55-jähriger Mann bemerkt eine derbe Knotenbildung in der Hohlhand seiner rechten Hand.',
+    'Der Ringfinger und der kleine Finger lassen sich nicht mehr vollständig passiv strecken.',
+    'Der Patient kann seine Hand nicht mehr flach auf eine Tischplatte auflegen (Table-Top-Test positiv).',
+    'Die Veränderung ist schmerzlos, behindert ihn aber zunehmend im Alltag.',
+    'In der Anamnese gibt er einen langjährigen Diabetes mellitus und einen mäßigen Alkoholkonsum an.',
+    'Es handelt sich um eine gutartige Wucherung der Palmaraponeurose.'
+  ]},
+  { id: 71, date: '2026-03-12', solution: 'Karpaltunnelsyndrom', hints: [
+    'Eine 45-jährige Frau klagt über nächtliches "Einschlafen" und Kribbeln der ersten drei Finger.',
+    'Sie berichtet, dass die Beschwerden durch kräftiges Ausschütteln der Hände besser werden.',
+    'Bei der Untersuchung zeigt sich eine leichte Schwäche beim Abspreizen des Daumens.',
+    'Das Beklopfen des Handgelenks löst elektrische Missempfindungen aus (Hoffmann-Tinel-Zeichen).',
+    'In fortgeschrittenen Fällen findet sich eine Atrophie des Daumenballens (Thenarmuskulatur).',
+    'Die Ursache ist eine Kompression des Nervus medianus im Handwurzelkanal.'
+  ]},
+  { id: 72, date: '2026-03-13', solution: 'Neuroblastom', hints: [
+    'Ein 2-jähriges Kind wird wegen eines zunehmenden Bauchumfangs und allgemeiner Unruhe vorgestellt.',
+    'Bei der Untersuchung fällt ein fester, unregelmäßiger Tumor im Oberbauch auf, der die Mittellinie überschreitet.',
+    'Auffällig sind bläuliche Verfärbungen um beide Augen herum (sog. Brillenhämatom).',
+    'Im Urin lassen sich erhöhte Abbauprodukte von Katecholaminen (Vanillinmandelsäure) nachweisen.',
+    'Der Tumor geht meist von den sympathischen Grenzstrangzellen oder dem Nebennierenmark aus.',
+    'Es ist der häufigste extrakranielle solide Tumor im Kindesalter.'
+  ]},
+  { id: 73, date: '2026-03-14', solution: 'Wilms-Tumor', hints: [
+    'Ein 4-jähriges Mädchen zeigt eine schmerzlose Zunahme des Bauchumfangs auf der linken Seite.',
+    'Die Mutter berichtet, dass das Kind gelegentlich etwas Blut im Urin hatte (Hämaturie).',
+    'Vitalzeichen: Auffallend ist ein für das Alter erhöhter Blutdruck (130/85 mmHg).',
+    'In der Palpation findet sich ein glatt begrenzter, fester Tumor in der Flankengegend.',
+    'Im Ultraschall stellt sich der Tumor als von der Niere ausgehend dar.',
+    'Dieses Krankheitsbild wird fachsprachlich auch als Nephroblastom bezeichnet.'
+  ]},
+  { id: 74, date: '2026-03-15', solution: 'Hüftschnupfen', hints: [
+    'Ein 5-jähriger Junge beginnt plötzlich zu hinken und klagt über Schmerzen im rechten Knie.',
+    'Bei der Untersuchung ist die Innenrotation und Abduktion der rechten Hüfte schmerzhaft eingeschränkt.',
+    'Das Kind hat kein Fieber und wirkt ansonsten gesund und munter.',
+    'In der Anamnese berichtet die Mutter von einem viralen Atemwegsinfekt vor 10 Tagen.',
+    'Die Sonographie zeigt einen deutlichen Gelenkerguss im betroffenen Hüftgelenk.',
+    'Diese Coxitis fugax heilt unter Schonung und Ibuprofen meist innerhalb einer Woche folgenlos ab.'
+  ]},
+  { id: 75, date: '2026-03-16', solution: 'Morbus Perthes', hints: [
+    'Ein 6-jähriger Junge stellt sich mit einem belastungsabhängigen Hinken vor, das seit Wochen besteht.',
+    'Die Schmerzen werden primär in der Leiste und im Oberschenkel lokalisiert.',
+    'Die Untersuchung zeigt eine eingeschränkte Beweglichkeit der Hüfte, insbesondere bei der Innenrotation.',
+    'In der Röntgenaufnahme zeigt sich eine Verdichtung (Sklerosierung) und Abflachung des Femurkopfes.',
+    'Im Gegensatz zum Hüftschnupfen ist der Verlauf hier chronisch und langwierig.',
+    'Es handelt sich um eine idiopathische aseptische Nekrose des Hüftkopfes.'
+  ]},
+  { id: 76, date: '2026-03-17', solution: 'Lungenembolie', hints: [
+    'Eine 65-jährige Patientin klagt 5 Tage nach einer Hüftprothesen-OP über plötzliche Atemnot.',
+    'Sie berichtet über einen stechenden Schmerz im Brustkorb beim tiefen Einatmen.',
+    'Vitalzeichen: Puls 115 bpm, Atemfrequenz 26/min, Sauerstoffsättigung 90%.',
+    'Die Lunge klingt bei der Auskultation völlig unauffällig (sog. "Singen über dem Totenacker").',
+    'Im EKG findet sich ein sog. S1Q3-Typ als Zeichen einer Rechtsherzbelastung.',
+    'Die CT-Angiographie sichert die Diagnose durch den Nachweis von Thromben in den Lungenarterien.'
+  ]},
+  { id: 77, date: '2026-03-18', solution: 'Appendizitis', hints: [
+    'Ein 22-jähriger Student klagt über Schmerzen, die diffus im Oberbauch begannen und nun gewandert sind.',
+    'Er gibt an, dass jeder Schritt und jedes Husten die Schmerzen im rechten Unterbauch verstärken.',
+    'Vitalzeichen: Temperatur axial 37,8 °C, rektal 38,7 °C (Temperaturdifferenz > 0,8 °C).',
+    'Der Patient zeigt ein positives Psoas-Zeichen beim Heben des rechten Beines gegen Widerstand.',
+    'Labor: Deutliche Leukozytose und ein ansteigendes CRP.',
+    'In der Sonographie findet sich eine verdickte, nicht komprimierbare Struktur ("Target-Phänomen").'
+  ]},
+  { id: 78, date: '2026-03-19', solution: 'Herzinfarkt', hints: [
+    'Ein 58-jähriger bekannter Diabetiker klagt über ein massives Engegefühl hinter dem Brustbein.',
+    'Er beschreibt den Schmerz als "Elefant, der auf meiner Brust steht" und berichtet über Übelkeit.',
+    'Der Schmerz strahlt in den linken Kieferwinkel und den linken Arm aus.',
+    'Vitalzeichen: Blutdruck 105/70 mmHg, der Patient ist kaltschweißig und wirkt sehr ängstlich.',
+    'Im EKG zeigen sich signifikante ST-Streckenhebungen in den Ableitungen II, III und aVF.',
+    'Der Goldstandard zur Sicherung ist die Bestimmung des herzspezifischen Troponin T oder I.'
+  ]},
+  { id: 79, date: '2026-03-20', solution: 'Nikotinvergiftung', hints: [
+    'Eine 16-jährige Patientin stellt sich mit akut aufgetretener Übelkeit, Schwindel und Kopfschmerzen vor.',
+    'Sie wirkt sehr unruhig, zittrig und klagt über ein "Flattern" in der Brust.',
+    'Vitalzeichen: Leichte Tachykardie (110 bpm), Blutdruck und Sauerstoffsättigung sind jedoch im Normbereich.',
+    'Die Anamnese mit den anwesenden Eltern bleibt unergiebig; Drogen- oder Medikamentenkonsum wird verneint.',
+    'Die Untersuchung zeigt kalten Schweiß (Diaphorese), einen leichten Tremor und vermehrten Speichelfluss.',
+    'Nachdem die Eltern den Raum verlassen, gesteht sie das Kauen mehrerer Nikotinkaugummis und gleichzeitiges Vaping.'
+  ]}
+];
 
     let currentPuzzleIndex = 0;
     let revealedCount = 1;
