@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arztdle - Täglich Medizin-Diagnosen erraten</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+
+        /* ===== VARIABLEN ===== */
+        :root {
+            --bg-blue: #f0f7ff;
+            --hint-blue: #d1e9ff;
+            --text-dark: #2c3e50;
+            --accent: #2a9d8f;
+            --success: #27ae60;
+            --error: #c0392b;
+        }
+
+        /* ===== BASIS ===== */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-blue);
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        /* ===== NAVIGATION ===== */
+        nav {
+            position: relative;
+            width: 100%;
+            background: #fff;
+            border-bottom: 1px solid #d1d9e0;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #666;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        nav a:hover { color: var(--accent); }
+
+        #dark-mode-btn {
+            position: absolute;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header-info {
+            color: #888;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h1 { margin: 10px 0 25px 0; font-size: 1.5rem; }
+
+        /* ===== STREAK ===== */
+        .streak-banner {
+            font-size: 0.9rem;
+            color: #e8a472;
+            font-weight: bold;
+            margin-bottom: 5px;
+            min-height: 20px;
+        }
+
+        /* ===== HINWEISE ===== */
+        .hint-container { min-height: 300px; }
+
+        .hint-box {
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+            border-left: 5px solid;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .hint-box.visible { display: block; }
+
+        .hint-box:nth-child(1) { background: #fdecea; border-color: #e87a72; }
+        .hint-box:nth-child(2) { background: #fdf0e8; border-color: #e8a472; }
+        .hint-box:nth-child(3) { background: #fdf7e3; border-color: #e8cc72; }
+        .hint-box:nth-child(4) { background: #f5fae3; border-color: #a8cc5a; }
+        .hint-box:nth-child(5) { background: #edf7ee; border-color: #6bbf72; }
+        .hint-box:nth-child(6) { background: #e3f5e6; border-color: #3aad4e; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===== EINGABE ===== */
+        .input-area {
+            position: relative;
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        button#submit-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button#submit-btn:hover { opacity: 0.9; }
+
+        /* ===== AUTOCOMPLETE ===== */
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: calc(100% - 100px);
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .autocomplete-suggestions:empty { display: none; }
+
+        .suggestion {
+            padding: 12px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .suggestion:hover { background: #f8f9fa; color: var(--accent); }
+
+        /* ===== STATUS & COUNTDOWN ===== */
+        #status-msg {
+            margin-top: 20px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+
+        .countdown-box {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .countdown-box .time {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-top: 5px;
+        }
+
+        /* ===== SEKTIONEN ===== */
+        .section { display: none; }
+        .active  { display: block; }
+
+        /* ===== ARCHIV ===== */
+        .archive-list { text-align: left; margin-top: 20px; }
+
+        .archive-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ===== STATISTIK ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stats-box {
+            background: #f0f7ff;
+            border-radius: 10px;
+            padding: 20px 10px;
+            text-align: center;
+        }
+
+        .stats-box .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stats-box .label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== DARK MODE ===== */
+        body.dark                          { background: #1a1a2e; color: #e0e0e0; }
+        body.dark .container               { background: #16213e; box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+        body.dark nav                      { background: #16213e; border-color: #2a2a4a; }
+        body.dark nav a                    { color: #aaa; }
+        body.dark nav a:hover              { color: var(--accent); }
+        body.dark input                    { background: #1a1a2e; border-color: #2a2a4a; color: #e0e0e0; }
+        body.dark .autocomplete-suggestions{ background: #16213e; border-color: #2a2a4a; }
+        body.dark .suggestion              { color: #e0e0e0; }
+        body.dark .suggestion:hover        { background: #1a1a2e; }
+        body.dark .archive-item            { border-color: #2a2a4a; }
+        body.dark .countdown-box           { background: #1a1a2e; }
+        body.dark .countdown-box .time     { color: var(--accent); }
+        body.dark .stats-box               { background: #1a1a2e; }
+        body.dark .stats-box .number       { color: var(--accent); }
+        body.dark .streak-banner           { color: #e8a472; }
+
+        body.dark .hint-box:nth-child(1)   { background: #3d1f1e; border-color: #e87a72; }
+        body.dark .hint-box:nth-child(2)   { background: #3d2a1e; border-color: #e8a472; }
+        body.dark .hint-box:nth-child(3)   { background: #3d341e; border-color: #e8cc72; }
+        body.dark .hint-box:nth-child(4)   { background: #2a3d1e; border-color: #a8cc5a; }
+        body.dark .hint-box:nth-child(5)   { background: #1e3d22; border-color: #6bbf72; }
+        body.dark .hint-box:nth-child(6)   { background: #1a3d1e; border-color: #3aad4e; }
+
+    </style>
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav>
+    <a onclick="showSection('play')">Heutiges Rätsel</a>
+    <a onclick="showSection('archive')">Archiv</a>
+    <a onclick="showSection('stats')">Statistik</a>
+    <a onclick="showSection('info')">Info</a>
+    <button id="dark-mode-btn" onclick="toggleDark()">🌙</button>
+</nav>
+
+<!-- ===== HAUPTCONTAINER ===== -->
+<div class="container">
+
+    <!-- SPIEL -->
+    <div id="play" class="section active">
+        <div class="header-info" id="meta-info">Arztdle #?? - DATUM</div>
+        <div class="streak-banner" id="streak-banner"></div>
+        <h1>Was ist die Diagnose?</h1>
+        <div id="hint-wrapper" class="hint-container"></div>
+        <div class="input-area">
+            <input type="text" id="guess-input" placeholder="Diagnose suchen..." autocomplete="off">
+            <div id="suggestions" class="autocomplete-suggestions"></div>
+            <button id="submit-btn" onclick="checkAnswer()">Absenden</button>
+        </div>
+        <div id="status-msg"></div>
+        <div class="countdown-box" id="countdown-box" style="display:none">
+            <div>Nächstes Rätsel in</div>
+            <div class="time" id="countdown-timer">--:--:--</div>
+        </div>
+    </div>
+
+    <!-- ARCHIV -->
+    <div id="archive" class="section">
+        <h1>Vergangene Fälle</h1>
+        <div id="archive-content" class="archive-list"></div>
+    </div>
+
+    <!-- STATISTIK -->
+    <div id="stats" class="section">
+        <h1>Meine Statistik</h1>
+        <div id="stats-content"></div>
+    </div>
+
+    <!-- INFO -->
+    <div id="info" class="section">
+        <h1>Über Arztdle DE</h1>
+        <p>Dieses Tool hilft Medizinstudierenden, ihr diagnostisches Wissen zu trainieren.</p>
+        <p>Jeden Tag erscheint ein neuer klinischer Fall. Viel Erfolg!</p>
+        <p style="font-size: 0.8rem; color: #999;">Erstellt für eine angehende Ärztin. -A</p>
+    </div>
+
+</div>
+
+<script>
+
+    // ===== DIAGNOSEN-LISTE =====
+    const allDiagnoses = [
+        "5α-Reduktase-Mangel", "Abdominelles Aortenaneurysma", "Abduzensparese",
+        "Abhängige Persönlichkeitsstörung", "Absenz-Epilepsie", "Abszess",
+        "Acanthosis nigricans", "Achalasie", "Achondroplasie", "Acne vulgaris",
+        "Adenokarzinom der Lunge", "Adenomatöse Polypen", "Adenomyose",
+        "Adenovirus-Infektion", "ADHS", "Adipositas", "Adultes T-Zell-Lymphom",
+        "AERD (Aspirin-exazerbierte Atemwegserkrankung)", "Äußere Hämorrhoiden",
+        "Afrikanische Schlafkrankheit (Trypanosoma brucei)", "Agoraphobie",
+        "Ahornsirupkrankheit (MSUD)", "AIDS", "Akne", "Akromegalie",
+        "Aktinische Keratose", "Aktinomykose", "Akustikusneurinom (Vestibularis-Schwannom)",
+        "Akute Appendizitis", "Akute Bronchitis",
+        "Akute disseminierte Enzephalomyelitis (ADEM)", "Akute Dystonie",
+        "Akute Extremitätenischämie", "Akute Gastritis", "Akute gastrointestinale Blutung",
+        "Akute intermittierende Porphyrie", "Akute interstitielle Nephritis (AIN)",
+        "Akute Leukämie", "Akute lymphoblastische Leukämie (ALL)",
+        "Akute Mesenterialischämie", "Akute myeloische Leukämie (AML)",
+        "Akute Nebenniereninsuffizienz", "Akute Pankreatitis",
+        "Akute Promyelozytenleukämie (APL)", "Akute Psychose", "Akute Pyelonephritis",
+        "Akute Sinusitis", "Akute Tonsillitis", "Akute Tubulusnekrose (ATN)",
+        "Akute Zystitis", "Akutes Abdomen", "Akutes Atemnotsyndrom (ARDS)",
+        "Akutes Koronarsyndrom", "Akutes Lungenödem", "Akutes Nierenversagen",
+        "Albinismus", "Alkoholentzug", "Alkoholgebrauchsstörung", "Alkoholintoxikation",
+        "Alkoholische Hepatitis", "Alkoholische Leberzirrhose", "Alkoholkrankheit",
+        "Allergie", "Allergische bronchopulmonale Aspergillose (ABPA)",
+        "Allergische Konjunktivitis", "Allergische Kontaktdermatitis", "Allergische Rhinitis",
+        "Alopecia areata", "Alpha-1-Antitrypsin-Mangel", "Alpha-Thalassämie",
+        "Alport-Syndrom", "Alzheimer-Demenz", "Alzheimer-Krankheit", "Amöbenruhr",
+        "Amphetaminentzug", "Amphetaminintoxikation", "Amyloidose",
+        "Amyotrophe Lateralsklerose (ALS)", "Anämie", "Anämie bei chronischer Erkrankung",
+        "Analfissur", "Anaphylaxie", "Anaplasmose", "Anaplastisches Schilddrüsenkarzinom",
+        "Androgeninsensitivitätssyndrom", "Anenzephalie", "Angelman-Syndrom",
+        "Angina pectoris", "Angiodysplasie", "Angiosarkom",
+        "Ankylosierende Spondylitis (Morbus Bechterew)",
+        "Anomaler Ursprung der linken Koronararterie", "Anorexia nervosa",
+        "Anovulatorische Infertilität", "Anpassungsstörung", "Anteriore Uveitis (Iritis)",
+        "Anterograde Amnesie", "Antiphospholipid-Syndrom",
+        "Antipsychotika-induzierte Hyperprolaktinämie", "Antisoziale Persönlichkeitsstörung",
+        "Antithrombin-Mangel", "Anularpankreas", "Aortenaneurysma", "Aortendissektion",
+        "Aortenisthmusstenose", "Aortenklappeninsuffizienz", "Aortenklappenstenose",
+        "Aplastische Anämie", "Appendizitis", "Argininosukzinat-Lyase-Mangel",
+        "Aromatasemangel", "Arterielle Hypertonie", "Arteriovenöse Fistel", "Arthritis",
+        "Arthrose", "Artifizielle Störung (auferlegt auf andere Person)", "Asbestose",
+        "Ascaris-lumbricoides-Infektion", "Aseptische Knochennekrose", "Aseptische Meningitis",
+        "Asherman-Syndrom (Intrauterine Adhäsionen)", "Aspirationspneumonie",
+        "Asthma bronchiale", "Aszites", "Ataxia teleangiectatica", "Atelektase",
+        "Atheroembolische Erkrankung", "Atherosklerose", "Atonischer Anfall",
+        "Atopisches Ekzem", "Atraumatische Milzruptur", "Atriale Extrasystolen",
+        "Atrioventrikulärer Septumdefekt (AVSD)", "Atypische Depression",
+        "Aufmerksamkeitsdefizit-Hyperaktivitätsstörung (ADHS)", "Autismus",
+        "Autismus-Spektrum-Störung (ASS)", "Autoimmungastritis", "Autoimmunhepatitis",
+        "Autosomal-dominante polyzystische Nierenerkrankung (ADPKD)",
+        "Autosomal-dominante tubulointerstitielle Nierenerkrankung",
+        "Autosomal-rezessive polyzystische Nierenerkrankung (ARPKD)",
+        "AV-Block 2. Grades Typ I (Wenckebach)", "AV-Block 2. Grades Typ II (Mobitz II)",
+        "AV-Block 3. Grades (Totaler AV-Block)", "Axiale Hiatushernie", "Babesiose",
+        "Bacillus-cereus-Infektion", "Bakterielle Meningitis",
+        "Bakterielle Vaginose (Gardnerella vaginalis)", "Bandscheibenvorfall", "Bandverletzung",
+        "Barbituratintoxikation", "Barrett-Ösophagus", "Bartholin-Zyste (Bartholin-Abszess)",
+        "Bartter-Syndrom", "Basaliom", "Basalzellkarzinom", "Bazilläre Angiomatose",
+        "Bechterew-Krankheit", "Becker-Muskeldystrophie", "Beckwith-Wiedemann-Syndrom",
+        "Behçet-Krankheit", "Belastungsinkontinenz", "Benigne neonatale Hyperbilirubinämie",
+        "Benigne Prostatahyperplasie (BPH)",
+        "Benigner paroxysmaler Lagerungsschwindel (BPLS)", "Benzodiazepin-Intoxikation",
+        "Benzodiazepinentzug", "Bernard-Soulier-Syndrom", "Berylliose", "Beta-Thalassämie",
+        "Bettwanzenbefall (Cimex lectularius)", "Binge-Eating-Störung", "Bipolar-I-Störung",
+        "Bipolar-II-Störung", "Bipolare Störung", "Blasenentzündung", "Blasenmole",
+        "Blastomykose", "Bleivergiftung", "Bluthochdruck",
+        "Boerhaave-Syndrom (Ösophagusperforation)", "Borderline-Persönlichkeitsstörung",
+        "Borrelia recurrentis (Rückfallfieber)", "Borreliose", "Botulismus",
+        "Bovine spongiforme Enzephalopathie (BSE)", "Branchiogene Zyste", "Brenner-Tumor",
+        "Broca-Aphasie", "Bronchiales Karzinoidtumor", "Bronchialkarzinom", "Bronchiektasen",
+        "Bronchitis", "Brown-Séquard-Syndrom", "Brucellose", "Brugada-Syndrom",
+        "Bruton-Agammaglobulinämie", "Budd-Chiari-Syndrom", "Bulimia nervosa",
+        "Bullöses Pemphigoid", "Burkitt-Lymphom", "Burnout-Syndrom",
+        "Campylobacter-jejuni-Infektion", "Candidose (Candida albicans)", "Cannabisentzug",
+        "Cannabisintoxikation", "Caplan-Syndrom", "Cat-Eye-Syndrom", "Cauda-equina-Syndrom",
+        "Chagas-Krankheit (Trypanosoma cruzi)", "Charcot-Bouchard-Mikroaneurysma",
+        "Charcot-Marie-Tooth-Erkrankung", "CHARGE-Syndrom",
+        "Chassaignac-Lähmung (Radiusköpfchensubluxation)", "Chiari-I-Malformation",
+        "Chiari-II-Malformation", "Chikungunya-Fieber", "Chlamydia-trachomatis-Zervizitis",
+        "Chlamydien-Konjunktivitis des Neugeborenen", "Cholangiokarzinom",
+        "Choledocholithiasis (Aufsteigende Cholangitis)", "Cholelithiasis", "Cholera",
+        "Cholezystitis", "Chondroblastom", "Chondrosarkom", "Chordaesehnenruptur",
+        "Chorionkarzinom", "Chronisch obstruktive Lungenerkrankung (COPD)",
+        "Chronische Appendizitis", "Chronische atrophische Gastritis", "Chronische Bronchitis",
+        "Chronische Granulomatose", "Chronische Leukämie",
+        "Chronische lymphatische Leukämie (CLL)", "Chronische Mesenterialischämie",
+        "Chronische mukokutane Candidiasis", "Chronische myeloische Leukämie (CML)",
+        "Chronische Niereninsuffizienz", "Chronische Pankreatitis",
+        "Chronische Pyelonephritis", "Chronische Sinusitis", "Chronische Tonsillitis",
+        "Chronisches Nierenversagen", "Clonorchis sinensis (Chinesischer Leberegel)",
+        "Clostridioides-difficile-Kolitis", "Clostridium-botulinum-Intoxikation",
+        "Clostridium-tetani-Infektion (Tetanus)", "Clusterkopfschmerz", "Colitis ulcerosa",
+        "COPD", "Cor pulmonale", "Cornelia-de-Lange-Syndrom", "Coronavirus-Infektion",
+        "Corpus-luteum-Zyste", "Creutzfeldt-Jakob-Krankheit (CJK)", "Cri-du-chat-Syndrom",
+        "Crigler-Najjar-Syndrom Typ 1", "Cushing-Syndrom", "Cystische Fibrose",
+        "D-Transposition der großen Arterien", "Dandy-Walker-Malformation",
+        "De-Quervain-Tendovaginitis",
+        "De-Quervain-Thyreoiditis (Subakute granulomatöse Thyreoiditis)", "Dekubitusulkus",
+        "Delir", "Delirium tremens", "Demenz", "Dengue-Fieber", "Denys-Drash-Syndrom",
+        "Depersonalisations-/Derealisationsstörung", "Depression", "Depressive Episode",
+        "Dermatitis", "Dermatitis herpetiformis", "Dermatomyositis", "Dhat-Syndrom",
+        "Diabetes insipidus", "Diabetes mellitus Typ 1", "Diabetische Ketoazidose (DKA)",
+        "Diabetische Nephropathie", "Diabetische Retinopathie",
+        "Diabetisches Fußsyndrom (Neuropathisches Ulkus)", "Diamond-Blackfan-Anämie",
+        "Diastolische Dysfunktion", "Diffuse axonale Schädigung", "Diffuse kortikale Nekrose",
+        "Diffuse proliferative Glomerulonephritis", "Diffuser ösophagealer Spasmus",
+        "Diffuses großzelliges B-Zell-Lymphom (DLBCL)", "DiGeorge-Syndrom",
+        "Dilatative Kardiomyopathie", "Diphtherie (Corynebacterium diphtheriae)",
+        "Direkter Leistenbruch", "Disruptive Stimmungsregulationsstörung",
+        "Disseminierte Gonorrhoe", "Disseminierte intravasale Gerinnung (DIG)",
+        "Dissoziative Amnesie", "Dissoziative Identitätsstörung",
+        "Distale renale tubuläre Azidose (RTA Typ 1)", "Divertikulitis", "Divertikulose",
+        "Doppeltes Nierenbecken-Kelch-System", "Dottersacktumor",
+        "Double-Outlet-Rechter-Ventrikel (DORV)", "Down-Syndrom (Trisomie 21)",
+        "Dranginkontinenz", "Dressler-Syndrom", "Dubin-Johnson-Syndrom",
+        "Duchenne-Muskeldystrophie", "Ductus-mammarius-Ektasie",
+        "Dünndarm-Bakterienüberwucherung (SIBO)", "Dünndarmobstruktion",
+        "Duktales Karzinom in situ (DCIS)", "Dumping-Syndrom", "Dupuytren-Kontraktur",
+        "Dysgerminom", "Dysthymie (Persistierende depressive Störung)", "Ebola-Viruskrankheit",
+        "Ebstein-Anomalie", "Echinokokkose (Echinococcus granulosus)", "Echovirus-Infektion",
+        "Edwards-Syndrom (Trisomie 18)", "Ehrlichiose", "Eisenmangelanämie",
+        "Eisenmenger-Syndrom", "Eisenvergiftung", "Eklampsie",
+        "Ektope Schwangerschaft", "Ektopes Schilddrüsengewebe (Zungenschilddrüse)",
+        "Embolie", "Embryonales Karzinom", "Endemischer Typhus (Rickettsia typhi)",
+        "Endokarditis", "Endometriose", "Endometritis", "Endometriumhyperplasie",
+        "Endometriumkarzinom", "Entamoeba-histolytica-Infektion", "Enterokokkeninfektion",
+        "Entzündliches Mammakarzinom", "Enuresis", "Enzephalitis", "Eosinophile Granulomatose",
+        "Eosinophile Granulomatose mit Polyangiitis (Churg-Strauss-Syndrom)",
+        "Eosinophile Ösophagitis", "Ependymom",
+        "Epidemischer Fleckfieber (Rickettsia prowazekii)", "Epididymitis", "Epiduralhämatom",
+        "Epilepsie (chronische Anfallserkrankung)", "Epileptischer Anfall",
+        "Epiphyseolysis capitis femoris (ECF)", "Epitheliale Hyperplasie der Brust",
+        "Epstein-Barr-Virus-Infektion (EBV)", "Erkältungs-Coronavirus-Infektion", "Erysipel",
+        "Erythema multiforme", "Erythema nodosum", "Escherichia-coli-Harnwegsinfektion",
+        "Escherichia-coli-Prostatitis", "Essentielle Hypertonie", "Essentielle Thrombozythämie",
+        "Essenzieller Tremor", "Euthyreoter-Krank-Syndrom", "Ewing-Sarkom",
+        "Ex-vacuo-Ventrikulomegalie", "Exogene Thyreotoxikose", "Exokrine Pankreasinsuffizienz",
+        "Extragonadaler Keimzelltumor", "Extrammärer Morbus Paget", "Extrauteringravidität",
+        "Faktor-V-Leiden-Mutation", "Fallot-Tetralogie",
+        "Familiäre adenomatöse Polyposis (FAP)",
+        "Familiäre Chylomikronämie (Lipoproteinlipase-Mangel)",
+        "Familiäre hypokalziurische Hyperkalzämie", "Fanconi-Anämie",
+        "Fanconi-Syndrom (Proximale renale tubuläre Azidose, RTA Typ 2)", "Favismus",
+        "Fazialisparese (Bell-Parese)", "Felty-Syndrom", "Femoralhernie",
+        "Fetales Hydantoin-Syndrom", "Fettleber", "Fettnekrose der Brust",
+        "Feuchte Makuladegeneration", "Fibrinöse Perikarditis", "Fibroadenom",
+        "Fibromuskuläre Dysplasie", "Fibromyalgie", "Fibrozystische Mastopathie",
+        "Fischbandwurm (Diphyllobothrium latum)", "Fokal-segmentale Glomerulosklerose (FSGS)",
+        "Fokale noduläre Hyperplasie", "Fokaler Anfall mit eingeschränktem Bewusstsein",
+        "Fokaler bewusster Anfall (einfacher Partialanfall)", "Follikelzyste des Ovars",
+        "Follikuläres Lymphom", "Follikuläres Schilddrüsenkarzinom", "Foster-Kennedy-Syndrom",
+        "Fragiles-X-Syndrom", "Fraktur", "Friedreich-Ataxie", "Frontotemporale Demenz",
+        "Frühgeborenen-Retinopathie", "Frühsommer-Meningoenzephalitis",
+        "Funktionelle hypothalamische Amenorrhö", "G6PD-Mangel", "Galaktosämie",
+        "Gallengangsatresie", "Gallenkolik (Cholelithiasis)", "Gallensteine", "Ganglionzyste",
+        "Gardner-Syndrom", "Gasgangrän (Clostridium perfringens)", "Gastritis",
+        "Gastroenteritis", "Gastroösophageale Refluxkrankheit (GERD)", "Gaucher-Erkrankung",
+        "Gelbfieber", "Gemischte Kryoglobulinämie", "Generalisierte Angststörung",
+        "Geschlechtsdysphorie", "Gestationshypertonie", "Giardiasis", "Gicht", "Gichtanfall",
+        "Gigantismus", "Gilbert-Syndrom", "Gitelman-Syndrom", "Glanzmann-Thrombasthenie",
+        "Glaukom", "Glioblastoma multiforme", "Globale Aphasie", "Glomustumor", "Glukagonom",
+        "Glykogenspeicherkrankheit Typ I (von-Gierke-Krankheit)",
+        "Glykogenspeicherkrankheit Typ II (Morbus Pompe)",
+        "Glykogenspeicherkrankheit Typ III (Morbus Cori)",
+        "Glykogenspeicherkrankheit Typ IV (Andersen-Krankheit)",
+        "Glykogenspeicherkrankheit Typ V (McArdle-Erkrankung)", "GM1-Gangliosidose",
+        "Gonorrhoe-Prostatitis", "Goodpasture-Syndrom",
+        "Granulomatose mit Polyangiitis (Wegener-Granulomatose)", "Granulosazelltumor des Ovars",
+        "Großzelliges Lungenkarzinom", "Grünholzfraktur", "Gürtelrose (Herpes zoster)",
+        "Guillain-Barré-Syndrom", "Gynäkomastie", "Haarzell-Leukämie", "Hämangioblastom",
+        "Hämochromatose", "Hämoglobin-C-Krankheit", "Hämolytisch-urämisches Syndrom (EHEC)",
+        "Hämolytische Anämie bei Infektion", "Hämophilie A",
+        "Hämophilie B (Christmas-Krankheit)", "Hämophilie C",
+        "Haemophilus-influenzae-Infektion", "Hakenwurm-Infektion (Ancylostoma/Necator)",
+        "Hand-Fuß-Mund-Krankheit (Coxsackievirus)", "Hantavirus-Infektion", "Harnwegsinfekt",
+        "Hashimoto-Thyreoiditis", "HELLP-Syndrom",
+        "Heparininduzierte Thrombozytopenie (HIT)", "Hepatische Enzephalopathie",
+        "Hepatisches Angiosarkom", "Hepatisches Hämangiom", "Hepatitis A", "Hepatitis B",
+        "Hepatitis C", "Hepatitis E", "Hepatitis-D-Virus (HDV)", "Hepatozelluläres Adenom",
+        "Hepatozelluläres Karzinom (HCC)", "Hereditäre Fruktoseintoleranz",
+        "Hereditäre Hämochromatose", "Hereditäre Sphärozytose",
+        "Herpes-simplex-Virus 2 (HSV-2)", "Herpes-simplex-Virus-1-Infektion (HSV-1)",
+        "Herzinfarkt", "Herzinsuffizienz", "Herzklappenfehler", "Herzrhythmusstörung",
+        "Herzschrittmacher-Dysfunktion", "Herzstillstand", "Herztamponade",
+        "Hidradenitis suppurativa", "Histoplasmose", "Histrionische Persönlichkeitsstörung",
+        "Hitzschlag", "HIV", "HIV-assoziierte Demenz", "Hodenentzündung", "Hodentorsion",
+        "Hodgkin-Lymphom", "Holiday-Heart-Syndrom (alkoholinduziertes Vorhofflimmern)",
+        "Holoprosenzephalie", "Homozystinurie", "Horner-Syndrom",
+        "HPV-Kondylome (Condylomata acuminata)", "HPV-Larynxpapillomatose",
+        "Hüftdysplasie (Entwicklungsdysplasie der Hüfte)", "Hüftschnupfen", "Hufeisenniere",
+        "Humanes Immundefizienzvirus (HIV)", "Hunter-Syndrom", "Huntington-Krankheit",
+        "Hurler-Syndrom", "Hydronephrose", "Hydrozele", "Hymenalatresie", "Hyper-IgE-Syndrom",
+        "Hyper-IgM-Syndrom (CD40-Ligand-Mangel)", "Hypercholesterinämie",
+        "Hyperkaliämische tubuläre Azidose (RTA Typ 4)", "Hyperlipidämie",
+        "Hyperosmolares hyperglykämisches Syndrom (HHS)", "Hyperosmolares Koma",
+        "Hyperplastische Polypen", "Hypersensitivitätspneumonitis",
+        "Hypertensive Herzerkrankung", "Hypertensive Krise", "Hypertensive Retinopathie",
+        "Hyperthyreose", "Hypertriglyzeridämie", "Hypertrophe Kardiomyopathie (HKMP)",
+        "Hypnagoge Halluzinationen", "Hypnopompe Halluzinationen",
+        "Hypogonadotroper Hypogonadismus", "Hypomane Episode", "Hypoparathyreoidismus",
+        "Hypophysenadenom", "Hypophysenapoplexie", "Hypophysenprolaktinom", "Hypothyreose",
+        "Hypovolämischer Schock", "Ichthyosis vulgaris",
+        "Idiopathische intrakranielle Hypertension (Pseudotumor cerebri)",
+        "Idiopathische pulmonale Fibrose", "IgA-Nephropathie (Berger-Krankheit)",
+        "IgA-Vaskulitis (Henoch-Schönlein-Purpura)", "IgG4-assoziierte Erkrankung", "Ileus",
+        "Iliotibialband-Syndrom", "Immunthrombozytopenie", "Impetigo contagiosa",
+        "Indirekter Leistenbruch", "Induratio penis plastica", "Infantiles Hämangiom",
+        "Infektiöse Endokarditis", "Infektionsassoziierte Glomerulonephritis", "Influenza",
+        "Influenzavirus-Infektion", "Innere Hämorrhoiden", "Insomnie",
+        "Instabile Angina pectoris", "Insulinom", "Intellektuelle Entwicklungsstörung",
+        "Intermittierende explosible Störung", "Internukleäre Ophthalmoplegie",
+        "Interstitielle Pneumonie (atypische Pneumonie)", "Interventrikuläre Septumruptur",
+        "Intraduktales Papillom", "Intrazerebrale Blutung", "Invagination (Intussuszeption)",
+        "Invasive Aspergillose", "Invasives duktales Karzinom", "Invasives lobuläres Karzinom",
+        "Invasives Zervixkarzinom", "Ischämische Kolitis", "Ischämischer Priapismus",
+        "Ischämischer Schlaganfall – Arteria basilaris",
+        "Ischämischer Schlaganfall – Arteria cerebelli inferior anterior (AICA)",
+        "Ischämischer Schlaganfall – Arteria cerebelli inferior posterior (PICA)",
+        "Ischämischer Schlaganfall – Arteria cerebri anterior (ACA)",
+        "Ischämischer Schlaganfall – Arteria cerebri media (ACM)",
+        "Ischämischer Schlaganfall – Arteria cerebri posterior (ACP)",
+        "Ischämischer Schlaganfall – Arteria spinalis anterior",
+        "Ischämischer Schlaganfall – Lenticulostriatalarterien",
+        "JC-Virus-Infektion (Polyomavirus)", "Jod-Basedow-Phänomen",
+        "Jodmangel-Hypothyreose", "Juvenile Polyposis-Syndrom", "Kälteagglutininkrankheit",
+        "Kallmann-Syndrom", "Kalziumpyrophosphat-Depositionskrankheit (Pseudogicht)",
+        "Kammerflimmern", "Kaposi-Sarkom (HHV-8)", "Kardiales Myxom", "Kardiogener Schock",
+        "Karies", "Karotissinushypersensitivität", "Karpaltunnelsyndrom",
+        "Kartagener-Syndrom (Primäre Ziliendyskinesie)", "Karzinoid-Syndrom", "Katarakt",
+        "Katzenkratzkrankheit (Bartonella henselae)", "Kavernöses Sinussyndrom",
+        "Kawasaki-Syndrom", "Keimstrang-Fibrom", "Keimstrangtumor Thekom",
+        "Keratosis pilaris", "Keuchhusten (Bordetella pertussis)", "Kirschangiom",
+        "Klavikulafraktur", "Klebsiella-pneumoniae-Infektion", "Kleinzelliges Lungenkarzinom",
+        "Klinefelter-Syndrom", "Kniegelenksbandverletzung (VKB, MCL, Menisken)",
+        "Körperdysmorphe Störung", "Körperliche Kindesmisshandlung", "Koffeinintoxikation",
+        "Kohlenmonoxidvergiftung", "Kokainentzug", "Kokainintoxikation", "Kokzidioidomykose",
+        "Kolonkarzinom", "Kolorektales Karzinom", "Kommunizierender Hydrozephalus",
+        "Kompartmentsyndrom", "Komplexes regionales Schmerzsyndrom (CRPS)",
+        "Kongenitale Hypothyreose (Kretinismus)", "Kongenitale Nebennierenhyperplasie",
+        "Konjunktivitis", "Konstriktive Perikarditis", "Konus-Medullaris-Syndrom",
+        "Konversionsstörung", "Koronararterienspasmen (Prinzmetal-Angina)",
+        "Korsakow-Syndrom", "Kostochondritis", "Krabbe-Erkrankung", "Krampfadern",
+        "Kraniopharyngeom", "Krankheitsangststörung",
+        "Kryptogene organisierende Pneumonie (KOP)", "Kryptokokkose (Cryptococcus neoformans)",
+        "Kryptorchismus", "Kryptosporidiose", "Kubitaltunnelsyndrom (Ulnarisneuropathie)",
+        "Kuru", "Kurzdarmsyndrom", "Kurze psychotische Störung",
+        "Kutane leukozytoklastische Vaskulitis", "Laktationsmastitis", "Laktoseintoleranz",
+        "Lambert-Eaton-Syndrom", "Langerhans-Zell-Histiozytose", "Langes-QT-Syndrom",
+        "Laterale Epikondylitis (Tennisellenbogen)", "Leberversagen", "Leberzirrhose",
+        "Legasthenie", "Legionärskrankheit", "Legionellose", "Leiomyom (Uterusmyom)",
+        "Leishmaniose", "Leitungsaphasie", "Lepra", "Leptospirose", "Lesch-Nyhan-Syndrom",
+        "Leukämie", "Leukozyten-Adhäsionsdefizienz (LAD)", "Lewy-Körper-Demenz",
+        "Leydig-Zelltumor des Hodens", "Lichen planus", "Lichen sclerosus",
+        "Lichen simplex chronicus", "Liddle-Syndrom", "Linksschenkelblock",
+        "Linksventrikuläre Hypertrophie (LVH)", "Linsenluxation", "Lipom", "Lissenzephalie",
+        "Listeria-monocytogenes-Infektion", "Lithiumtoxizität", "Loa-loa-Filariose",
+        "Lobuläres Karzinom in situ (LCIS)", "LSD-Intoxikation", "Ludwig-Angina",
+        "Lumbaler Bandscheibenvorfall", "Lungenabszess", "Lungenembolie (LE)",
+        "Lungenentzündung", "Lungenkontusion", "Lupus erythematodes", "Luxation",
+        "Lyme-Borreliose (Borrelia burgdorferi)", "Lymphatische Filariose (Wuchereria bancrofti)",
+        "Lynch-Syndrom (HNPCC)", "Magenkarzinom", "Major Depression (MDD)",
+        "Major Depression mit psychotischen Merkmalen", "Makroangiopathische hämolytische Anämie",
+        "Malaria", "Maligne Hyperthermie", "Malignes neuroleptisches Syndrom (MNS)",
+        "Mallory-Weiss-Syndrom", "Malrotation des Darms", "Mammakarzinom", "Manische Episode",
+        "Mantelzell-Lymphom", "Marcus-Gunn-Pupille (Relatives afferentes Pupillendefizit)",
+        "Marginalzonenlymphom", "Masern", "Mayer-Rokitansky-Küster-Hauser-Syndrom",
+        "MCAD-Mangel", "McCune-Albright-Syndrom", "MDMA-Intoxikation", "Meckel-Divertikel",
+        "Mediale Epikondylitis (Golferellenbogen)",
+        "Medialer Tibiakantensyndrom (Schienbeinkantensyndrom)", "Mediastinitis",
+        "Medikamenteninduzierte hämolytische Anämie", "Medulläres Schilddrüsenkarzinom",
+        "Medulloblastom", "Megaloblastäre Anämie (Vitamin-B12-Mangel)", "Melanom",
+        "Melanom maligne", "Melanozytärer Nävus", "Melasma", "Membranöse Nephropathie",
+        "Membranoproliferative Glomerulonephritis", "MEN1", "MEN2A", "MEN2B", "Meningeom",
+        "Meningitis", "Meningozele", "Menopause", "Mesotheliom",
+        "Metabolisch assoziierte Fettlebererkrankung (MAFLD)",
+        "Metachromatische Leukodystrophie (MLD)", "Migräne",
+        "Mikroangiopathische hämolytische Anämie", "Mikroskopische Kolitis",
+        "Mikroskopische Polyangiitis (MPA)", "Miller-Fisher-Syndrom", "Milzabszess",
+        "Milzbrand (Bacillus anthracis)", "Minimal-Change-Glomerulopathie",
+        "Mischkollagenose (MCTD)", "Mitralklappeninsuffizienz", "Mitralklappenprolaps",
+        "Mitralklappenstenose", "Mitralklappensuffizienz", "Mitteldarm-Volvulus",
+        "Mittelhandfraktur (Boxerfraktur)", "Molluscum contagiosum",
+        "Monoklonale Gammopathie unklarer Signifikanz (MGUS)", "Morbus Addison",
+        "Morbus Basedow", "Morbus Bechterew", "Morbus Crohn", "Morbus Cushing",
+        "Morbus Fabry", "Morbus Hirschsprung", "Morbus Legg-Calvé-Perthes", "Morbus Paget",
+        "Morbus Paget der Brust", "Morbus Parkinson", "Morbus Whipple", "Morbus Wilson",
+        "Morton-Neurom", "Mukoepidermoidkarzinom", "Mukormykose (Mucor/Rhizopus)",
+        "Mukosale Polypen", "Multifokale atriale Tachykardie (MAT)", "Multiple Sklerose",
+        "Multiples Myelom", "Multizystisch-dysplastische Niere", "Mumps (Paramyxovirus)",
+        "MUTYH-assoziierte Polyposis", "Muzinöses Karzinom", "Muzinöses Zystadenom",
+        "Myasthenia gravis", "Mycobacterium tuberculosis", "Mycoplasma-pneumoniae-Pneumonie",
+        "Mycosis fungoides (Kutanes T-Zell-Lymphom)", "Myelodysplastisches Syndrom",
+        "Myelofibrose", "Myelomeningozele", "Myeloschisis", "Myokarditis",
+        "Myokardkontusion", "Myoklonischer Anfall", "Myositis ossificans", "Myotone Dystrophie",
+        "Ménétrier-Erkrankung", "Naegleria-fowleri-Enzephalitis", "Narbenhernie",
+        "Narkolepsie", "Narzisstische Persönlichkeitsstörung",
+        "Neisseria-gonorrhoeae-Zervizitis", "Neisseria-meningitidis-Infektion",
+        "Nekrotisierende Enterokolitis", "Neonatale Gonokokken-Konjunktivitis",
+        "Neonatale intraventrikuläre Blutung", "Nephritisches Syndrom",
+        "Nephroblastom (Wilms-Tumor)", "Nephrogener Diabetes insipidus", "Nephrolithiasis",
+        "Nephrotisches Syndrom", "Netzhautablösung", "Neuroblastom",
+        "Neurodermitis (Atopische Dermatitis)", "Neurofibromatose Typ I",
+        "Neurofibromatose Typ II", "Nicht-megaloblastäre Anämie",
+        "Nichtkommunizierender Hydrozephalus", "Nichtproliferative diabetische Retinopathie",
+        "Nichtsezernierendes Hypophysenadenom", "Niemann-Pick-Erkrankung", "Niereninsuffizienz",
+        "Nierensteine (Nephrolithiasis)", "Nierenzellkarzinom", "Nikotinentzug",
+        "Nikotinintoxikation", "Nikotinvergiftung", "Nokardiose", "Normaldruckhydrozephalus",
+        "Norovirus", "Norovirus-Gastroenteritis", "NSTEMI",
+        "Obesitas-Hypoventilations-Syndrom", "Obstruktive Lungenerkrankung",
+        "Obstruktive Schlafapnoe (OSA)", "Obstruktiver Schock", "Ösophagusadenokarzinom",
+        "Ösophaguskandidose", "Ösophaguskarzinom", "Ösophagusvarizen",
+        "Östliches Pferdeenzephalitisvirus", "Offene Augapfelverletzung", "Offenwinkelglaukom",
+        "Okulomotoriusparese (N.-III.-Parese)", "Oligodendrogliom",
+        "Onchozerkose (Flussblindheit)", "Opioidentzug", "Opioidintoxikation",
+        "Oppositionelles Trotzverhalten", "Orale Haarleukoplakie", "Orchitis",
+        "Ornithin-Transcarbamylase-Mangel", "Orotazidurie", "Orthostatische Hypotonie",
+        "Osgood-Schlatter-Krankheit", "Osteitis deformans (Morbus Paget)", "Osteoblastom",
+        "Osteochondrom", "Osteogenesis imperfecta", "Osteoides Osteom", "Osteomalazie",
+        "Osteomyelitis", "Osteopetrose", "Osteoporose", "Osteosarkom", "Otitis externa",
+        "Otitis media", "Ovarialkarzinom", "Ovarialzyste", "Ovarientorsion",
+        "Ovotestikuläre Störung der Geschlechtsentwicklung",
+        "Oxyuriasis (Enterobius vermicularis)", "Paget-von-Schroetter-Syndrom",
+        "Pancoast-Tumor", "Pancreas divisum", "Panikattacke", "Panikstörung",
+        "Pankreasadenokarzinom", "Pankreaskarzinom", "Pankreatitis",
+        "Papilläres Schilddrüsenkarzinom", "Paragangliom",
+        "Parainfluenza-Virusinfektion (Krupp)", "Parakokzidioidomykose",
+        "Paralytischer Ileus (Ogilvie-Syndrom)", "Paranoide Persönlichkeitsstörung",
+        "Paraösophageale Hiatushernie", "Parkinson", "Parkinson-Krankheit",
+        "Paroxysmale nächtliche Hämoglobinurie",
+        "Paroxysmale supraventrikuläre Tachykardie (PSVT)", "Parvovirus B19",
+        "Pasteurella-multocida-Infektion", "Patau-Syndrom (Trisomie 13)",
+        "Patellofemorales Schmerzsyndrom", "Pathologisches Glücksspiel",
+        "Pauci-immune Glomerulonephritis", "Pavor nocturnus (Schlafterror)",
+        "Pedikulose (Läusebefall)", "Pelvic Inflammatory Disease (PID)", "Pemphigus vulgaris",
+        "Penisplattenepithelkarzinom", "Peptisches Ulkus", "Peripartale Depression",
+        "Periphere arterielle Verschlusskrankheit (pAVK)", "Peripherer Schwindel",
+        "Peritonitis", "Peritonsillarer Abszess", "Persistierender Ductus arteriosus (PDA)",
+        "Persistierendes Foramen ovale (PFO)", "Pest (Yersinia pestis)",
+        "Peutz-Jeghers-Syndrom", "Pfeiffersches Drüsenfieber", "Phäochromozytom",
+        "Phantomschmerz", "Phencyclidin-Intoxikation (PCP)", "Phenylketonurie (PKU)",
+        "Phobie", "Phylloides-Tumor", "Pica", "Pilozytisches Astrozytom", "Pityriasis rosea",
+        "Pityriasis versicolor", "Placenta praevia", "Placenta-accreta-Spektrum",
+        "Plantarfasziitis", "Plasmodium-falciparum-Malaria", "Plasmodium-malariae-Malaria",
+        "Plasmodium-vivax/ovale-Malaria", "Plattenepithelkarzinom",
+        "Plattenepithelkarzinom der Harnblase", "Plattenepithelkarzinom der Haut",
+        "Plattenepithelkarzinom der Lunge", "Plattenepithelkarzinom des Ösophagus",
+        "Plazenta praevia", "Plazentalösung", "Pleomorphes Adenom", "Pleuraerguss",
+        "Plummer-Vinson-Syndrom", "Pneumocystis-jirovecii-Pneumonie (PCP)",
+        "Pneumokokkenpneumonie (Streptococcus pneumoniae)", "Pneumomediastinum", "Pneumonie",
+        "Pneumothorax", "Poliomyelitis", "Poliovirus-Infektion", "Polyarteriitis nodosa (PAN)",
+        "Polycythaemia vera", "Polymyalgia rheumatica (PMR)", "Polymyositis",
+        "Polyzystisches Ovarialsyndrom (PCOS)", "Poplitealzyste (Baker-Zyste)",
+        "Porphyria cutanea tarda", "Porphyrie", "Portale Hypertension", "Porzellan-Gallenblase",
+        "Posteriore Urethralklappe", "Postinfarkt-Papillarmuskelruptur",
+        "Postinfarkt-Tamponade", "Postinfarkt-Ventrikelfreiwandruptur", "Postpartale Blues",
+        "Postpartale Psychose", "Poststreptokokken-Glomerulonephritis",
+        "Posttraumatische Belastungsstörung (PTBS)", "Potter-Sequenz", "Prader-Willi-Syndrom",
+        "Präeklampsie", "Präpatellarbursitis", "Prärenales akutes Nierenversagen",
+        "Presbyakusis", "Presbyopie", "Primär biliäre Cholangitis",
+        "Primär sklerosierende Cholangitis (PSC)", "Primäre Dysmenorrhö",
+        "Primäre Hypertonie", "Primäre Nebenniereninsuffizienz (Morbus Addison)",
+        "Primäre Ovarialinsuffizienz", "Primäre psychogene Polydipsie",
+        "Primärer Hyperaldosteronismus (Conn-Syndrom)", "Primärer Hyperparathyreoidismus",
+        "Primärer Spontanpneumothorax", "Primäres Hodenlymphom", "Primäres ZNS-Lymphom",
+        "Progressive multifokale Leukoenzephalopathie (PML)", "Proktitis",
+        "Proliferative diabetische Retinopathie", "Prostatakarzinom", "Protein-C/S-Mangel",
+        "Prothrombin-G20210A-Mutation", "Pseudoachalasie", "Pseudofollikulitis barbae",
+        "Pseudohypoparathyreoidismus Typ 1A", "Pseudomonas-aeruginosa-Infektion",
+        "Pseudopseudohypoparathyreoidismus", "Psittakose (Chlamydophila psittaci)",
+        "Psoasabszess", "Psoriasis", "Psoriasis-Arthritis", "Pulmonale Hypertonie",
+        "Pulmonalklappeninsuffizienz", "Pulmonalklappenstenose", "Pulsus paradoxus",
+        "Pyelonephritis", "Pylorusstenose", "Pyogener Leberabszess", "Pyogenes Granulom",
+        "Pyruvatkinasemangel", "Q-Fieber (Coxiella burnetii)", "Rachitis",
+        "Radialisneuropathie (Parkbanklähmung)", "Ramsay-Hunt-Syndrom",
+        "Rapid-progressive Glomerulonephritis (RPGN)", "Raynaud-Phänomen", "Raynaud-Syndrom",
+        "Reaktive Arthritis", "Rechtsschenkelblock", "Rechtsventrikuläre Hypertrophie (RVH)",
+        "Refeeding-Syndrom", "Refluxkrankheit", "Reifes zystisches Teratom",
+        "Reizdarmsyndrom", "Rektusmuskel-Diastase", "Renale Osteodystrophie",
+        "Renale Papillennekrose", "Renales Onkozytom", "Restless-Legs-Syndrom",
+        "Restriktive Kardiomyopathie", "Restriktive Lungenerkrankung",
+        "Retinalarterienokklusion", "Retinalvenenverschluss", "Retinitis pigmentosa",
+        "Retinoblastom", "Retrograde Amnesie", "Retropharyngealer Abszess", "Reye-Syndrom",
+        "Rh-Erythroblastose (Morbus haemolyticus neonatorum)", "Rhabdomyolyse",
+        "Rhabdomyom (Herzmuskulatur)", "Rheumatische Herzerkrankung", "Rheumatoide Arthritis",
+        "Rhinosinusitis", "Rhinovirus-Infektion (Erkältung)", "Riedel-Thyreoiditis",
+        "Riesenzellarteriitis (Temporalarteriitis)", "Riesenzelltumor des Knochens",
+        "Rocky-Mountain-Fleckfieber (Rickettsia rickettsii)", "Röteln", "Rosazea",
+        "Roseola infantum (HHV-6)", "Rotavirus-Gastroenteritis", "Rotor-Syndrom",
+        "RSV-Bronchiolitis", "Saisonal abhängige Depression", "Salmonellose",
+        "Sandhoff-Erkrankung", "Sarkoidose", "SARS-CoV-2-Infektion (COVID-19)", "Scharlach",
+        "Schilddrüsenadenom", "Schistosomiasis", "Schizoaffektive Störung",
+        "Schizoide Persönlichkeitsstörung", "Schizophrenie", "Schizophreniforme Störung",
+        "Schizotypische Persönlichkeitsstörung", "Schlafapnoe", "Schlaganfall",
+        "Schwangerschaftscholestase", "Schwere kombinierte Immundefizienz (SCID)",
+        "Seborrhoische Dermatitis", "Seborrhoische Keratose", "Sehnenruptur",
+        "Sekundäre biliäre Zirrhose", "Sekundäre Hypertonie", "Sekundärer Hyperaldosteronismus",
+        "Sekundärer Hyperparathyreoidismus", "Sekundärer Spontanpneumothorax",
+        "Selektiver IgA-Mangel", "Selektiver Mutismus", "Seminom", "Sepsis",
+        "Septische Arthritis", "Septischer Schock", "Seröses Karzinom", "Seröses Zystadenom",
+        "Serotonin-Syndrom", "Serratierte Polypen", "Sertoli-Leydig-Zelltumor",
+        "Sertoli-Zelltumor des Hodens", "Sexuelle Dysfunktion", "Sheehan-Syndrom",
+        "Shigellose", "SIADH", "Sialadenitis", "Sialolithiasis", "Sichelzellanämie",
+        "Sick-Sinus-Syndrom", "Sideroblastische Anämie", "Silikose",
+        "Simulation (Malingering)", "Sinding-Larsen-Johansson-Syndrom",
+        "Sinusvenenthrombose", "Sjögren-Syndrom", "Skabies", "Sklerodermie",
+        "Sklerosierende Adenose der Brust", "Skombroid-Fischvergiftung",
+        "Smith-Magenis-Syndrom", "Somatisierungsstörung",
+        "Somatoforme Störung (Somatische Belastungsstörung)", "Somatostatinom",
+        "Soziale Angststörung", "Spannungskopfschmerz", "Spannungspneumothorax",
+        "Speicheldrüsentumoren", "Spermatozele", "Spina bifida occulta",
+        "Spinale Muskelatrophie (Werdnig-Hoffmann-Krankheit)", "Spinaler Epiduralabszess",
+        "Spinalkanalstenose", "Spondylolisthesis", "Spontane bakterielle Peritonitis",
+        "Sporotrichose", "ST-Hebungsinfarkt (STEMI)", "Stabile Angina pectoris",
+        "Staphylococcus-aureus-Impetigo", "Staphylococcus-aureus-Zellulitis",
+        "Staphylococcus-epidermidis-Infektion", "Staphylococcus-saprophyticus-Infektion",
+        "Staphylogenes Schälblasen-Syndrom", "Status epilepticus", "STEMI",
+        "Stevens-Johnson-Syndrom (SJS)", "Störung des Sozialverhaltens",
+        "Streptococcus-agalactiae-Infektion (Gruppe-B-Streptokokken)",
+        "Streptococcus-bovis-Infektion",
+        "Streptococcus-pyogenes-Pharyngitis (Gruppe-A-Streptokokken)", "Strongyloidose",
+        "Struma ovarii", "Sturge-Weber-Syndrom", "Subakute kombinierte Degeneration",
+        "Subarachnoidalblutung (SAB)", "Subduralhämatom", "Subfalzine Herniation",
+        "Subklavian-Steal-Syndrom", "Submuköse Polypen", "Substanzgebrauchsstörung",
+        "Supines Hypotonie-Syndrom", "Swyer-Syndrom",
+        "Syndrom des scheinbaren Mineralokortikoidexzesses (SAME)",
+        "Syphilis (Treponema pallidum)", "Syringomyelie",
+        "Systemische juvenile idiopathische Arthritis (sJIA)",
+        "Systemische Sklerose (Sklerodermie)", "Systemischer Lupus erythematodes (SLE)",
+        "Systolische Dysfunktion", "Tabes dorsalis", "Tachykardie",
+        "Taenia solium (Neurozystizerkose)", "Takayasu-Arteriitis", "Takotsubo-Kardiomyopathie",
+        "Tay-Sachs-Erkrankung", "Temporomandibuläre Dysfunktion",
+        "Tertiärer Hyperparathyreoidismus", "Tetanus", "Thecalutein-Zyste des Ovars",
+        "Thrombangiitis obliterans (Morbus Buerger)", "Thrombose",
+        "Thrombotische thrombozytopenische Purpura (TTP)", "Thyreoglossusgang-Zyste",
+        "Thyreotoxische Krise", "Ticstörung", "Tiefe Venenthrombose (TVT)", "Tinea capitis",
+        "Tinea corporis (Ringelflechte)", "Tinea cruris", "Tinea pedis (Fußpilz)",
+        "Tinea unguium (Onychomykose)", "Tinnitus", "Todd-Parese", "Tollwut",
+        "Tonisch-klonischer Anfall", "Tonischer Anfall", "Torsade de Pointes",
+        "Torus-Fraktur (Wulstfraktur)", "Totale Lungenvenenfehlmündung (TAPVR)",
+        "Tourette-Syndrom", "Toxische multinodöse Struma", "Toxisches Megakolon",
+        "Toxocariasis (Viszerale Larva migrans)", "Toxoplasmose",
+        "Transiente ischämische Attacke (TIA)", "Transverse Myelitis",
+        "Traumatischer Pneumothorax", "Trennungsangststörung", "Trichinellose",
+        "Trichomoniasis", "Trichotillomanie", "Trichuriasis (Peitschenwurm)",
+        "Trigeminusneuralgie", "Trikuspidalatresie", "Trikuspidalklappenstenose",
+        "Trikuspidalklappensuffizienz", "Trizyklische-Antidepressiva-Toxizität",
+        "Trochlearisparese (N.-IV.-Parese)", "Trockene Makuladegeneration", "Tropische Sprue",
+        "Truncus arteriosus communis", "Tuberkulöse Meningitis", "Tuberkulose",
+        "Tuberöse Sklerose", "Tubo-ovarieller Abszess", "Tubuläre Azidose",
+        "Tularämie (Francisella tularensis)", "Turcot-Syndrom", "Turner-Syndrom",
+        "Typhus abdominalis (Salmonella typhi)", "Tyrosinämie", "Überlaufinkontinenz",
+        "Ulcus cruris", "Ulcus ventriculi", "Unkale Herniation", "Unreifes Teratom",
+        "Urämische Thrombozytopathie", "Urothelkarzinom der Harnblase", "Urtikaria",
+        "Uterusatonie", "Uterusruptur", "Vaginales Klarzellkarzinom",
+        "Vaginales Plattenepithelkarzinom", "Vaginales Sarcoma botryoides", "Varikosis",
+        "Varikozele", "Varizellen", "Vasa praevia", "Vaskuläre Demenz", "Vaskulitis",
+        "Vena-cava-superior-Syndrom", "Venöse Insuffizienz", "Ventrikelseptumdefekt (VSD)",
+        "Ventrikuläre Extrasystolen (VES)", "Ventrikuläre Tachykardie (VT)",
+        "Verbrennung 1. Grades", "Vermeidend-restriktive Persönlichkeitsstörung",
+        "Verschluss der Arteria spinalis anterior (Anteriores Kordsyndrom)",
+        "Vesikoureteraler Reflux", "VIPom", "Virale Hepatitis", "Vitamin-K-Mangel",
+        "Vitiligo", "Volvulus", "Von-Hippel-Lindau-Erkrankung", "Von-Willebrand-Erkrankung",
+        "Vorhofflattern", "Vorhofflimmern", "Vorhofseptumdefekt (ASD)",
+        "Vulnerables-Kind-Syndrom", "Vulvakarzinom", "Waardenburg-Syndrom", "WAGR-Syndrom",
+        "Wahnhafte Störung", "Waldenström-Makroglobulinämie",
+        "Warme autoimmune hämolytische Anämie", "Warthin-Tumor", "Warzen (Verrucae vulgares)",
+        "Waterhouse-Friderichsen-Syndrom", "Weiblicher hypergonadotroper Hypogonadismus",
+        "Wernicke-Aphasie", "Wernicke-Korsakow-Syndrom", "Williams-Syndrom", "Wilms-Tumor",
+        "Windpocken (Varizellen)", "Winkelblockglaukom", "Wiskott-Aldrich-Syndrom",
+        "Wolff-Chaikoff-Effekt (Jodexzess-Hypothyreose)", "Wolff-Parkinson-White-Syndrom (WPW)",
+        "X-chromosomale Adrenoleukodystrophie", "Xeroderma pigmentosum",
+        "Yersinia-enterocolitica-Infektion", "Zäkumvolvulus", "Zellweger-Syndrom",
+        "Zenker-Divertikel", "Zentrale pontine Myelinolyse (Osmotische Demyelinisierung)",
+        "Zentrale Schlafapnoe", "Zentrale transtentorielle Herniation",
+        "Zentraler Diabetes insipidus", "Zentraler Schwindel", "Zentrales Kordsyndrom",
+        "Zentrales Postschlaganfall-Schmerzsyndrom (CPSS)", "Zerebrales Ödem",
+        "Zerebralparese", "Zervikale Myelopathie", "Zervikale Spondylose",
+        "Zervikales Carcinoma in situ", "Zika-Virus-Infektion", "Zirbeldrüsentumor",
+        "Zöliakie", "Zollinger-Ellison-Syndrom", "Zwanghafte Persönlichkeitsstörung",
+        "Zwangsstörung (OCD)", "Zyanidvergiftung", "Zyklothyme Störung", "Zystinurie",
+        "Zystische Fibrose", "Zystitis", "Zytomegalievirus-Infektion (CMV)"
+    ].sort();
+
+
+    // ===== RÄTSEL-DATENBANK =====
+    const puzzles = [
+        { id: 1, date: '2026-01-01', solution: 'Appendizitis', hints: [
+            'Ein 19-jähriger Mann klagt über diffuse Bauchschmerzen seit dem Morgen.',
+            'Die Schmerzen haben sich im Verlauf in den rechten Unterbauch verlagert.',
+            'Er berichtet über Übelkeit und Appetitlosigkeit.',
+            'Bei der Untersuchung zeigt sich eine lokale Abwehrspannung rechts unten.',
+            'Loslassschmerz im linken Unterbauch verstärkt den Schmerz rechts.',
+            'Die Sonographie zeigt eine verdickte, nicht komprimierbare Appendix.'
+        ]},
+        { id: 2, date: '2026-01-02', solution: 'Pneumonie', hints: [
+            'Eine 65-jährige Patientin stellt sich mit Fieber und Husten vor.',
+            'Sie berichtet über gelblich-grünen Auswurf und Atemnot.',
+            'Beim Atmen verspürt sie stechende Schmerzen im Brustkorb.',
+            'Auskultatorisch finden sich feuchte Rasselgeräusche basal.',
+            'Die Atemfrequenz ist erhöht.',
+            'Das Röntgen zeigt ein lobäres Infiltrat.'
+        ]},
+        { id: 3, date: '2026-01-03', solution: 'Diabetes mellitus Typ 1', hints: [
+            'Ein 10-jähriger Junge wirkt zunehmend müde und abgeschlagen.',
+            'Die Eltern berichten, dass er sehr viel trinkt und häufig urinieren muss.',
+            'Er hat in kurzer Zeit deutlich an Gewicht verloren.',
+            'Die Untersuchung zeigt trockene Schleimhäute.',
+            'Es fällt ein süßlicher Atemgeruch auf.',
+            'Der Blutzucker ist stark erhöht mit Ketonen im Urin.'
+        ]},
+        { id: 4, date: '2026-01-04', solution: 'Asthma bronchiale', hints: [
+            'Eine 22-jährige Frau klagt über episodische Atemnot.',
+            'Die Beschwerden treten besonders nachts und bei Belastung auf.',
+            'Sie beschreibt ein Engegefühl in der Brust.',
+            'Bei der Auskultation ist ein pfeifendes Geräusch hörbar.',
+            'Die Symptome bessern sich nach Inhalation.',
+            'Die Lungenfunktion zeigt eine reversible Obstruktion.'
+        ]},
+        { id: 5, date: '2026-01-05', solution: 'Gichtanfall', hints: [
+            'Ein 55-jähriger Mann wacht nachts mit starken Gelenkschmerzen auf.',
+            'Das betroffene Gelenk ist gerötet und geschwollen.',
+            'Er kann die Berührung kaum ertragen.',
+            'Er berichtet über reichlichen Alkoholkonsum am Vorabend.',
+            'Das Großzehengrundgelenk ist betroffen.',
+            'Im Punktat finden sich nadelförmige Kristalle.'
+        ]},
+        { id: 6, date: '2026-01-06', solution: 'Meningitis', hints: [
+            'Eine 21-jährige Frau stellt sich mit hohem Fieber und Kopfschmerzen vor.',
+            'Sie ist lichtempfindlich und wirkt benommen.',
+            'Die Nackenbeweglichkeit ist schmerzhaft eingeschränkt.',
+            'Bei der Untersuchung zeigt sich ein Meningismus.',
+            'Es finden sich petechiale Hautveränderungen.',
+            'Die Lumbalpunktion zeigt einen trüben Liquor mit erhöhter Zellzahl.'
+        ]},
+        { id: 7, date: '2026-01-07', solution: 'Morbus Crohn', hints: [
+            'Ein 28-jähriger Mann berichtet über chronische Bauchschmerzen.',
+            'Er leidet unter wiederkehrenden Durchfällen.',
+            'Es besteht ein ungewollter Gewichtsverlust.',
+            'Die Beschwerden treten schubweise auf.',
+            'Im rechten Unterbauch ist eine druckschmerzhafte Resistenz tastbar.',
+            'Die Endoskopie zeigt segmentale Entzündungen mit Pflastersteinrelief.'
+        ]},
+        { id: 8, date: '2026-01-08', solution: 'Colitis ulcerosa', hints: [
+            'Ein 30-jähriger Patient klagt über blutige Durchfälle.',
+            'Er berichtet über häufigen Stuhldrang.',
+            'Die Schmerzen sind vor allem im linken Unterbauch lokalisiert.',
+            'Die Symptome bestehen seit mehreren Wochen.',
+            'Die Koloskopie zeigt eine kontinuierliche Entzündung vom Rektum ausgehend.',
+            'Die Histologie zeigt Kryptenabszesse.'
+        ]},
+        { id: 9, date: '2026-01-09', solution: 'Herzinfarkt', hints: [
+            'Ein 60-jähriger Mann klagt über starke Brustschmerzen.',
+            'Der Schmerz strahlt in den linken Arm aus.',
+            'Er ist kaltschweißig und wirkt ängstlich.',
+            'Die Beschwerden bestehen seit über 30 Minuten.',
+            'Im EKG zeigen sich ST-Hebungen.',
+            'Das Troponin ist deutlich erhöht.'
+        ]},
+        { id: 10, date: '2026-01-10', solution: 'Schlaganfall', hints: [
+            'Ein 72-jähriger Mann entwickelt plötzlich Sprachstörungen.',
+            'Sein rechter Arm ist kraftlos.',
+            'Das Gesicht wirkt asymmetrisch.',
+            'Die Symptome traten abrupt auf.',
+            'Die neurologische Untersuchung zeigt eine Hemiparese.',
+            'Die Bildgebung zeigt eine ischämische Läsion im Gehirn.'
+        ]},
+        { id: 11, date: '2026-01-11', solution: 'Lungenembolie', hints: [
+            'Eine 46-jährige Frau stellt sich mit plötzlich einsetzender Atemnot vor.',
+            'Sie berichtet über stechende Schmerzen im Brustkorb beim Einatmen.',
+            'Die Beschwerden begannen wenige Tage nach einer längeren Flugreise.',
+            'Die Vitalzeichen zeigen eine Tachykardie und eine leicht verminderte Sauerstoffsättigung.',
+            'Bei der Untersuchung fällt ein geschwollenes, druckschmerzhaftes Bein auf.',
+            'Die CT-Angiographie zeigt eine Kontrastmittelaussparung in den Pulmonalarterien.'
+        ]},
+        { id: 12, date: '2026-01-12', solution: 'Cholezystitis', hints: [
+            'Eine 50-jährige Patientin klagt über Schmerzen im rechten Oberbauch.',
+            'Die Beschwerden treten vor allem nach dem Essen auf.',
+            'Sie berichtet über Übelkeit und leichtes Fieber.',
+            'Der Schmerz strahlt in die rechte Schulter aus.',
+            'Bei tiefer Inspiration bricht sie die Einatmung aufgrund von Schmerzen ab.',
+            'Die Sonographie zeigt eine verdickte Gallenblasenwand mit pericholezystischem Flüssigkeitssaum.'
+        ]},
+        { id: 13, date: '2026-01-13', solution: 'Akute Pankreatitis', hints: [
+            'Ein 48-jähriger Mann stellt sich mit starken Oberbauchschmerzen vor.',
+            'Er beschreibt den Schmerz als in den Rücken ausstrahlend.',
+            'Die Beschwerden begannen plötzlich nach einem üppigen Abendessen.',
+            'Er leidet unter Übelkeit und wiederholtem Erbrechen.',
+            'Das Abdomen ist druckschmerzhaft und wirkt gebläht.',
+            'Die Serumlipase ist deutlich über dem Normwert erhöht.'
+        ]},
+        { id: 14, date: '2026-01-14', solution: 'Pyelonephritis', hints: [
+            'Eine 32-jährige Frau stellt sich mit Fieber und Rückenschmerzen vor.',
+            'Sie berichtet über Brennen beim Wasserlassen seit einigen Tagen.',
+            'Die Beschwerden haben sich in die Flanke verlagert.',
+            'Die Patientin wirkt krank und hat Schüttelfrost.',
+            'Die Untersuchung zeigt einen ausgeprägten Klopfschmerz im Nierenlager.',
+            'Der Urin zeigt Leukozyten, Nitrit und Bakterien.'
+        ]},
+        { id: 15, date: '2026-01-15', solution: 'Zöliakie', hints: [
+            'Ein 3-jähriges Kind wird wegen Wachstumsverzögerung vorgestellt.',
+            'Die Eltern berichten über voluminöse, übelriechende Stühle.',
+            'Das Abdomen wirkt gebläht, die Extremitäten dünn.',
+            'Die Beschwerden begannen nach Einführung von Getreideprodukten.',
+            'Labor zeigt Antikörper gegen Gewebstransglutaminase.',
+            'Die Dünndarmbiopsie zeigt eine Zottenatrophie.'
+        ]},
+        { id: 16, date: '2026-01-16', solution: 'Morbus Basedow', hints: [
+            'Eine 38-jährige Frau berichtet über Gewichtsverlust trotz gesteigertem Appetit.',
+            'Sie klagt über Nervosität und Herzrasen.',
+            'Die Patientin fühlt sich ständig warm und schwitzt vermehrt.',
+            'Bei der Untersuchung fällt ein feinschlägiger Tremor auf.',
+            'Die Augen wirken hervortretend.',
+            'Labor zeigt supprimiertes TSH und erhöhte TRAK-Antikörper.'
+        ]},
+        { id: 17, date: '2026-01-17', solution: 'Hashimoto-Thyreoiditis', hints: [
+            'Eine 45-jährige Frau klagt über Müdigkeit und Gewichtszunahme.',
+            'Sie berichtet über Kälteempfindlichkeit und Antriebslosigkeit.',
+            'Die Haut wirkt trocken und kühl.',
+            'Die Stimme klingt rau und verlangsamt.',
+            'Labor zeigt ein erhöhtes TSH.',
+            'Antikörper gegen Thyreoperoxidase sind nachweisbar.'
+        ]},
+        { id: 18, date: '2026-01-18', solution: 'Epilepsie', hints: [
+            'Ein 17-jähriger Patient wird nach einem plötzlichen Bewusstseinsverlust vorgestellt.',
+            'Augenzeugen berichten über eine Phase von Muskelsteifigkeit gefolgt von Zuckungen.',
+            'Nach dem Ereignis ist der Patient verwirrt und schläfrig.',
+            'Bei der Untersuchung fällt ein seitlicher Zungenbiss auf.',
+            'Die neurologische Untersuchung ist ansonsten unauffällig.',
+            'Das EEG zeigt typische epileptiforme Entladungen.'
+        ]},
+        { id: 19, date: '2026-01-19', solution: 'Multiple Sklerose', hints: [
+            'Eine 28-jährige Frau berichtet über verschwommenes Sehen auf einem Auge.',
+            'Zusätzlich klagt sie über ein Kribbeln in den Beinen.',
+            'Die Symptome traten vor einigen Wochen bereits einmal auf und besserten sich.',
+            'Die neurologische Untersuchung zeigt diskrete Ausfälle.',
+            'Im MRT finden sich multiple demyelinisierende Läsionen.',
+            'Der Liquor zeigt oligoklonale Banden.'
+        ]},
+        { id: 20, date: '2026-01-20', solution: 'Morbus Parkinson', hints: [
+            'Ein 70-jähriger Mann wird wegen zunehmender Verlangsamung vorgestellt.',
+            'Er berichtet über Zittern in einer Hand in Ruhe.',
+            'Die Bewegungen wirken steif und unbeholfen.',
+            'Beim Gehen schwingt ein Arm kaum mit.',
+            'Das Gesicht erscheint maskenhaft.',
+            'Die Symptome sprechen gut auf L-Dopa an.'
+        ]},
+        { id: 21, date: '2026-01-21', solution: 'COPD', hints: [
+            'Ein 67-jähriger Mann klagt über chronischen Husten.',
+            'Er berichtet über täglichen Auswurf, besonders morgens.',
+            'Bei Belastung ist er zunehmend kurzatmig.',
+            'Er gibt an, seit über 40 Jahren zu rauchen.',
+            'Die Untersuchung zeigt ein verlängertes Exspirium und leises Atemgeräusch.',
+            'Die Lungenfunktion zeigt eine nicht vollständig reversible Obstruktion.'
+        ]},
+        { id: 22, date: '2026-01-22', solution: 'Eisenmangelanämie', hints: [
+            'Eine 34-jährige Frau klagt über Müdigkeit und Leistungsabfall.',
+            'Sie berichtet über Schwindel und Konzentrationsprobleme.',
+            'Bei der Untersuchung wirkt sie blass.',
+            'Die Nägel erscheinen brüchig und leicht eingedellt.',
+            'Die Laboruntersuchung zeigt mikrozytäre, hypochrome Erythrozyten.',
+            'Das Ferritin ist deutlich erniedrigt.'
+        ]},
+        { id: 23, date: '2026-01-23', solution: 'Tiefe Venenthrombose', hints: [
+            'Ein 55-jähriger Mann klagt über Schmerzen im linken Unterschenkel.',
+            'Das Bein ist geschwollen und fühlt sich warm an.',
+            'Die Beschwerden traten nach längerer Immobilisation auf.',
+            'Die Haut wirkt leicht gerötet und gespannt.',
+            'Die Untersuchung zeigt einen Druckschmerz entlang der tiefen Venen.',
+            'Die Duplexsonographie bestätigt ein venöses Gerinnsel.'
+        ]},
+        { id: 24, date: '2026-01-24', solution: 'Akutes Glaukom', hints: [
+            'Eine 72-jährige Frau stellt sich mit starken Schmerzen im Auge vor.',
+            'Sie klagt über verschwommenes Sehen und Übelkeit.',
+            'Sie berichtet, farbige Ringe um Lichtquellen zu sehen.',
+            'Das betroffene Auge ist gerötet.',
+            'Der Augapfel wirkt bei Palpation verhärtet.',
+            'Der Augeninnendruck ist deutlich erhöht.'
+        ]},
+        { id: 25, date: '2026-01-25', solution: 'Katarakt', hints: [
+            'Ein 75-jähriger Patient berichtet über zunehmende Sehverschlechterung.',
+            'Er beschreibt ein verschwommenes und „verschleiertes" Sehen.',
+            'Besonders bei hellem Licht fühlt er sich geblendet.',
+            'Die Beschwerden haben sich langsam über Monate entwickelt.',
+            'Bei der Untersuchung erscheint die Linse getrübt.',
+            'Die Diagnose wird durch die Spaltlampenuntersuchung bestätigt.'
+        ]},
+        { id: 26, date: '2026-01-26', solution: 'Borreliose', hints: [
+            'Eine 29-jährige Frau bemerkt eine Hautveränderung am Oberschenkel.',
+            'Sie klagt über Müdigkeit und leichte Gliederschmerzen.',
+            'Die Rötung breitet sich langsam nach außen aus.',
+            'Das Zentrum erscheint heller als der Rand.',
+            'Sie erinnert sich an einen Zeckenstich vor einigen Wochen.',
+            'Das klinische Bild entspricht einem Erythema migrans.'
+        ]},
+        { id: 27, date: '2026-01-27', solution: 'Scharlach', hints: [
+            'Ein 7-jähriges Kind stellt sich mit Fieber und Halsschmerzen vor.',
+            'Die Tonsillen sind gerötet und belegt.',
+            'Es entwickelt sich ein feinfleckiger Hautausschlag.',
+            'Die Haut fühlt sich rau an.',
+            'Auffällig ist eine Rötung der Zunge mit hervortretenden Papillen.',
+            'Ein Schnelltest auf Streptokokken ist positiv.'
+        ]},
+        { id: 28, date: '2026-01-28', solution: 'Masern', hints: [
+            'Ein ungeimpftes Kind entwickelt Fieber und Husten.',
+            'Es besteht eine Konjunktivitis und Lichtempfindlichkeit.',
+            'Die Schleimhäute im Mund zeigen kleine weiße Flecken.',
+            'Ein makulopapulöses Exanthem beginnt im Gesicht.',
+            'Der Ausschlag breitet sich über den Körper aus.',
+            'Die Klinik ist typisch für eine virale Kinderkrankheit.'
+        ]},
+        { id: 29, date: '2026-01-29', solution: 'Mumps', hints: [
+            'Ein 10-jähriges Kind stellt sich mit Fieber vor.',
+            'Es klagt über Schmerzen beim Kauen.',
+            'Die Wangenregion wirkt geschwollen.',
+            'Die Schwellung betrifft die Ohrspeicheldrüse.',
+            'Sie kann ein- oder beidseitig auftreten.',
+            'Die Ursache ist eine virale Infektion der Parotis.'
+        ]},
+        { id: 30, date: '2026-01-30', solution: 'Röteln', hints: [
+            'Ein Kind entwickelt einen leichten Hautausschlag.',
+            'Die Symptome sind insgesamt mild ausgeprägt.',
+            'Es bestehen vergrößerte Lymphknoten im Nacken.',
+            'Das Exanthem ist feinfleckig und blass.',
+            'Es beginnt im Gesicht und breitet sich aus.',
+            'Die Erkrankung ist besonders in der Schwangerschaft relevant.'
+        ]},
+        { id: 31, date: '2026-01-31', solution: 'HIV', hints: [
+            'Ein 32-jähriger Mann stellt sich mit Fieber, Halsschmerzen und Lymphknotenschwellungen vor.',
+            'Er berichtet über eine ausgeprägte Abgeschlagenheit seit mehreren Tagen.',
+            'Die Symptome traten etwa zwei Wochen nach einem ungeschützten Sexualkontakt auf.',
+            'Bei der Untersuchung finden sich generalisierte Lymphknotenvergrößerungen.',
+            'Zusätzlich zeigt sich ein makulopapulöses Exanthem am Stamm.',
+            'Ein Labortest bestätigt eine frische virale Infektion mit spezifischen Antikörpern.'
+        ]},
+        { id: 32, date: '2026-02-01', solution: 'Tuberkulose', hints: [
+            'Ein 45-jähriger Mann klagt über chronischen Husten seit mehreren Wochen.',
+            'Er berichtet über Nachtschweiß und ungewollten Gewichtsverlust.',
+            'Gelegentlich bemerkt er blutigen Auswurf.',
+            'Die Auskultation zeigt diskrete Rasselgeräusche apikal.',
+            'Im Röntgenbild finden sich Infiltrate im oberen Lungenfeld.',
+            'Der Erregernachweis erfolgt über Sputumdiagnostik.'
+        ]},
+        { id: 33, date: '2026-02-02', solution: 'Gastritis', hints: [
+            'Eine 40-jährige Patientin klagt über Oberbauchschmerzen.',
+            'Die Beschwerden treten vor allem nach dem Essen auf.',
+            'Sie berichtet über Übelkeit und Völlegefühl.',
+            'Die Schmerzen sind eher dumpf und nicht kolikartig.',
+            'In der Anamnese gibt sie häufige Einnahme von Schmerzmitteln an.',
+            'Die Gastroskopie zeigt eine entzündete Magenschleimhaut.'
+        ]},
+        { id: 34, date: '2026-02-03', solution: 'Ulcus ventriculi', hints: [
+            'Ein 55-jähriger Mann berichtet über epigastrische Schmerzen.',
+            'Die Beschwerden treten besonders nach dem Essen auf.',
+            'Er beschreibt einen brennenden Schmerz.',
+            'Die Symptome bestehen seit mehreren Wochen.',
+            'Es besteht eine Anämie unklarer Genese.',
+            'Die Endoskopie zeigt ein ulzerierendes Areal im Magen.'
+        ]},
+        { id: 35, date: '2026-02-04', solution: 'Refluxkrankheit', hints: [
+            'Ein 48-jähriger Patient klagt über ein Brennen hinter dem Brustbein.',
+            'Die Beschwerden treten besonders nach dem Essen auf.',
+            'Im Liegen verschlechtern sich die Symptome.',
+            'Er berichtet über saures Aufstoßen.',
+            'Die Beschwerden bestehen seit Monaten.',
+            'Die Endoskopie zeigt Zeichen einer Ösophagitis.'
+        ]},
+        { id: 36, date: '2026-02-05', solution: 'Psoriasis', hints: [
+            'Ein 35-jähriger Patient stellt sich mit Hautveränderungen vor.',
+            'Er berichtet über schuppende, gerötete Plaques.',
+            'Die Veränderungen finden sich vor allem an Streckseiten.',
+            'Die Haut juckt nur geringfügig.',
+            'Beim Abkratzen zeigen sich silbrig glänzende Schuppen.',
+            'Es zeigt sich das typische Auspitz-Phänomen.'
+        ]},
+        { id: 37, date: '2026-02-06', solution: 'Neurodermitis', hints: [
+            'Ein 20-jähriger Patient klagt über starken Juckreiz.',
+            'Die Haut ist trocken und gerötet.',
+            'Die Veränderungen befinden sich vor allem in den Beugen.',
+            'Die Beschwerden bestehen seit der Kindheit.',
+            'Es kommt zu nässenden Ekzemen bei Schüben.',
+            'Es besteht eine atopische Disposition.'
+        ]},
+        { id: 38, date: '2026-02-07', solution: 'Malignes Melanom', hints: [
+            'Ein Patient bemerkt eine Veränderung eines Muttermals.',
+            'Es ist unregelmäßig begrenzt und zeigt unterschiedliche Farben.',
+            'Die Läsion hat in den letzten Monaten an Größe zugenommen.',
+            'Gelegentlich kommt es zu leichtem Bluten.',
+            'Die Untersuchung zeigt eine Asymmetrie und Farbvarianz.',
+            'Die Diagnose wird histologisch gesichert.'
+        ]},
+        { id: 39, date: '2026-02-08', solution: 'Leukämie', hints: [
+            'Ein 50-jähriger Patient klagt über Müdigkeit und Infektanfälligkeit.',
+            'Er berichtet über häufige blaue Flecken.',
+            'Es besteht eine zunehmende Schwäche.',
+            'Die Untersuchung zeigt eine Blässe und Lymphknotenschwellungen.',
+            'Das Blutbild zeigt Auffälligkeiten in mehreren Zellreihen.',
+            'Die Diagnose wird durch eine Knochenmarkuntersuchung gesichert.'
+        ]},
+        { id: 40, date: '2026-02-09', solution: 'Hodgkin-Lymphom', hints: [
+            'Ein 28-jähriger Mann bemerkt eine schmerzlose Schwellung am Hals.',
+            'Er berichtet über Nachtschweiß und Gewichtsverlust.',
+            'Es besteht ein ausgeprägter Juckreiz.',
+            'Die Lymphknoten sind derb und nicht druckschmerzhaft.',
+            'Nach Alkoholkonsum treten Schmerzen im Bereich der Lymphknoten auf.',
+            'Die Biopsie zeigt charakteristische Riesenzellen.'
+        ]},
+        { id: 41, date: '2026-02-10', solution: 'Chronische Niereninsuffizienz', hints: [
+            'Ein 68-jähriger Patient klagt über zunehmende Müdigkeit und Leistungsminderung.',
+            'Er berichtet über Appetitlosigkeit und gelegentliche Übelkeit.',
+            'Die Angehörigen bemerken eine zunehmende Verwirrtheit.',
+            'Bei der Untersuchung fallen blasse Haut und leichte Ödeme auf.',
+            'Labor zeigt erhöhte Retentionswerte und Elektrolytstörungen.',
+            'Die glomeruläre Filtrationsrate ist deutlich reduziert.'
+        ]},
+        { id: 42, date: '2026-02-11', solution: 'Harnwegsinfekt', hints: [
+            'Eine 26-jährige Frau klagt über häufigen Harndrang.',
+            'Sie berichtet über Brennen beim Wasserlassen.',
+            'Es bestehen leichte Unterbauchschmerzen.',
+            'Fieber ist nicht vorhanden.',
+            'Der Urin ist trüb und riecht auffällig.',
+            'Die Urinuntersuchung zeigt Leukozyten und Bakterien.'
+        ]},
+        { id: 43, date: '2026-02-12', solution: 'Endometriose', hints: [
+            'Eine 31-jährige Frau klagt über starke Unterbauchschmerzen.',
+            'Die Beschwerden treten zyklusabhängig auf.',
+            'Sie berichtet über Schmerzen beim Geschlechtsverkehr.',
+            'Es besteht ein unerfüllter Kinderwunsch.',
+            'Die Untersuchung zeigt eine Druckschmerzhaftigkeit im kleinen Becken.',
+            'Die Diagnose wird laparoskopisch gesichert.'
+        ]},
+        { id: 44, date: '2026-02-13', solution: 'Eklampsie', hints: [
+            'Eine 29-jährige Schwangere wird mit Krampfanfällen eingeliefert.',
+            'Zuvor klagte sie über Kopfschmerzen und Sehstörungen.',
+            'In der Anamnese bestand ein erhöhter Blutdruck.',
+            'Es zeigt sich eine Proteinurie.',
+            'Die Patientin ist somnolent.',
+            'Die Diagnose stellt eine schwere Komplikation der Schwangerschaft dar.'
+        ]},
+        { id: 45, date: '2026-02-14', solution: 'Präeklampsie', hints: [
+            'Eine 30-jährige Schwangere stellt sich zur Kontrolle vor.',
+            'Sie berichtet über Kopfschmerzen und gelegentliches Flimmern vor den Augen.',
+            'Bei der Untersuchung fällt ein erhöhter Blutdruck auf.',
+            'Es bestehen leichte Ödeme.',
+            'Der Urin zeigt Eiweiß.',
+            'Es handelt sich um eine schwangerschaftsspezifische Erkrankung.'
+        ]},
+        { id: 46, date: '2026-02-15', solution: 'Bandscheibenvorfall', hints: [
+            'Ein 45-jähriger Mann klagt über Rückenschmerzen.',
+            'Der Schmerz strahlt in ein Bein aus.',
+            'Er berichtet über ein Kribbeln entlang des Beines.',
+            'Die Beschwerden verstärken sich bei Bewegung.',
+            'Die Untersuchung zeigt ein positives Lasègue-Zeichen.',
+            'Das MRT zeigt eine Kompression einer Nervenwurzel.'
+        ]},
+        { id: 47, date: '2026-02-16', solution: 'Ischialgie', hints: [
+            'Ein Patient klagt über Schmerzen im unteren Rücken.',
+            'Die Schmerzen ziehen in das Gesäß und das Bein.',
+            'Sie treten besonders beim Sitzen auf.',
+            'Es besteht ein ziehender, elektrisierender Schmerzcharakter.',
+            'Die neurologische Untersuchung ist weitgehend unauffällig.',
+            'Die Beschwerden folgen dem Verlauf des Ischiasnervs.'
+        ]},
+        { id: 48, date: '2026-02-17', solution: 'Herpes zoster', hints: [
+            'Ein 60-jähriger Patient klagt über brennende Schmerzen an der Brust.',
+            'Die Schmerzen bestehen seit einigen Tagen.',
+            'Nun treten kleine Bläschen auf der Haut auf.',
+            'Die Hautveränderungen sind einseitig begrenzt.',
+            'Die Bläschen sind entlang eines Hautsegments angeordnet.',
+            'Die Ursache ist eine Reaktivierung eines Virus.'
+        ]},
+        { id: 49, date: '2026-02-18', solution: 'Varizellen', hints: [
+            'Ein Kind entwickelt Fieber und Hautausschlag.',
+            'Die Läsionen beginnen als kleine rote Flecken.',
+            'Im Verlauf entstehen Bläschen und Krusten.',
+            'Die Hautveränderungen treten in verschiedenen Stadien gleichzeitig auf.',
+            'Der Juckreiz ist ausgeprägt.',
+            'Es handelt sich um eine typische virale Kinderkrankheit.'
+        ]},
+        { id: 50, date: '2026-02-19', solution: 'Tetanus', hints: [
+            'Ein 55-jähriger Mann stellt sich nach einer Verletzung vor.',
+            'Er berichtet über zunehmende Muskelsteifigkeit.',
+            'Es kommt zu schmerzhaften Muskelkrämpfen.',
+            'Die Gesichtsmuskulatur wirkt starr.',
+            'Der Kiefer lässt sich kaum öffnen.',
+            'Die Erkrankung wird durch ein bakterielles Toxin verursacht.'
+        ]},
+        { id: 51, date: '2026-02-20', solution: 'Botulismus', hints: [
+            'Ein 45-jähriger Mann stellt sich mit zunehmender Schwäche vor.',
+            'Er berichtet über Doppelbilder und Schwierigkeiten beim Sprechen.',
+            'Im Verlauf treten Schluckstörungen auf.',
+            'Die Lähmungen schreiten von oben nach unten fort.',
+            'Die Sensibilität ist erhalten.',
+            'In der Anamnese findet sich der Verzehr selbst konservierter Lebensmittel.'
+        ]},
+        { id: 52, date: '2026-02-21', solution: 'Sepsis', hints: [
+            'Ein 70-jähriger Patient wird mit Fieber und Verwirrtheit eingeliefert.',
+            'Er wirkt stark reduziert und klagt über Schüttelfrost.',
+            'Die Vitalzeichen zeigen eine Tachykardie und Hypotonie.',
+            'Die Haut ist warm, später blass und kühl.',
+            'Labor zeigt erhöhte Entzündungsparameter und Laktat.',
+            'Es liegt eine lebensbedrohliche systemische Reaktion auf eine Infektion vor.'
+        ]},
+        { id: 53, date: '2026-02-22', solution: 'Anaphylaktischer Schock', hints: [
+            'Eine 25-jährige Frau entwickelt plötzlich Hautrötung und Juckreiz.',
+            'Kurz darauf treten Atemnot und Schwindel auf.',
+            'Sie berichtet über Kontakt mit einem möglichen Allergen.',
+            'Die Haut zeigt Quaddeln und Schwellungen.',
+            'Der Blutdruck fällt rasch ab.',
+            'Es handelt sich um eine akute systemische Überempfindlichkeitsreaktion.'
+        ]},
+        { id: 54, date: '2026-02-23', solution: 'Hypothyreose', hints: [
+            'Eine 52-jährige Frau klagt über Müdigkeit und Gewichtszunahme.',
+            'Sie berichtet über Kälteempfindlichkeit.',
+            'Die Haut ist trocken und rau.',
+            'Die Stimme wirkt heiser und verlangsamt.',
+            'Die Herzfrequenz ist erniedrigt.',
+            'Labor zeigt erhöhtes TSH und erniedrigte Schilddrüsenhormone.'
+        ]},
+        { id: 55, date: '2026-02-24', solution: 'Hyperthyreose', hints: [
+            'Ein 40-jähriger Patient berichtet über Gewichtsverlust trotz guten Appetits.',
+            'Er klagt über Nervosität und Schlafstörungen.',
+            'Es besteht ein Zittern der Hände.',
+            'Die Herzfrequenz ist erhöht.',
+            'Die Haut ist warm und feucht.',
+            'Labor zeigt supprimiertes TSH und erhöhte Schilddrüsenhormone.'
+        ]},
+        { id: 56, date: '2026-02-25', solution: 'Migräne', hints: [
+            'Eine 27-jährige Frau klagt über wiederkehrende Kopfschmerzen.',
+            'Die Schmerzen sind einseitig und pulsierend.',
+            'Begleitend treten Übelkeit und Lichtempfindlichkeit auf.',
+            'Die Beschwerden dauern mehrere Stunden an.',
+            'Vor Beginn berichtet sie über visuelle Störungen.',
+            'Die Symptome sind typisch für eine primäre Kopfschmerzerkrankung.'
+        ]},
+        { id: 57, date: '2026-02-26', solution: 'Cluster-Kopfschmerz', hints: [
+            'Ein 35-jähriger Mann klagt über extrem starke Kopfschmerzen.',
+            'Die Schmerzen treten einseitig im Bereich des Auges auf.',
+            'Die Attacken dauern etwa 30–60 Minuten.',
+            'Das Auge ist gerötet und tränt.',
+            'Die Beschwerden treten gehäuft über mehrere Wochen auf.',
+            'Der Patient wirkt während der Attacken unruhig und kann nicht still sitzen.'
+        ]},
+        { id: 58, date: '2026-02-27', solution: 'Depression', hints: [
+            'Eine 42-jährige Patientin berichtet über anhaltende Niedergeschlagenheit.',
+            'Sie hat das Interesse an früheren Aktivitäten verloren.',
+            'Der Schlaf ist gestört.',
+            'Die Energie ist deutlich vermindert.',
+            'Sie berichtet über Schuldgefühle und Konzentrationsprobleme.',
+            'Die Symptome bestehen seit mehreren Wochen.'
+        ]},
+        { id: 59, date: '2026-02-28', solution: 'Schizophrenie', hints: [
+            'Ein 23-jähriger Mann wird wegen auffälligem Verhalten vorgestellt.',
+            'Er berichtet, Stimmen zu hören.',
+            'Er fühlt sich von anderen verfolgt.',
+            'Die Gedanken wirken ungeordnet.',
+            'Es bestehen Wahnvorstellungen.',
+            'Die Symptome sprechen für eine psychotische Erkrankung.'
+        ]},
+        { id: 60, date: '2026-03-01', solution: 'Demenz', hints: [
+            'Ein 75-jähriger Patient wird wegen zunehmender Vergesslichkeit vorgestellt.',
+            'Er verlegt häufig Gegenstände.',
+            'Die Orientierung im Alltag fällt zunehmend schwer.',
+            'Die Angehörigen berichten über Persönlichkeitsveränderungen.',
+            'Die Symptome haben sich schleichend entwickelt.',
+            'Es handelt sich um eine progrediente kognitive Störung.'
+        ]},
+        { id: 61, date: '2026-03-02', solution: 'Alzheimer-Krankheit', hints: [
+            'Eine 72-jährige Patientin wird wegen zunehmender Vergesslichkeit vorgestellt.',
+            'Zunächst fielen Schwierigkeiten bei alltäglichen Aufgaben auf.',
+            'Die Patientin stellt wiederholt dieselben Fragen.',
+            'Im Verlauf treten Orientierungsprobleme auf.',
+            'Das Kurzzeitgedächtnis ist deutlich eingeschränkt.',
+            'Die Erkrankung zeigt einen schleichend progredienten Verlauf.'
+        ]},
+        { id: 62, date: '2026-03-03', solution: 'Delir', hints: [
+            'Ein 80-jähriger Patient zeigt plötzlich Verwirrtheit.',
+            'Die Symptome schwanken im Tagesverlauf.',
+            'Er wirkt zeitweise unruhig, dann wieder schläfrig.',
+            'Die Aufmerksamkeit ist deutlich reduziert.',
+            'Die Symptome traten akut nach einer Operation auf.',
+            'Es handelt sich um eine reversible akute kognitive Störung.'
+        ]},
+        { id: 63, date: '2026-03-04', solution: 'Insomnie', hints: [
+            'Eine 45-jährige Patientin klagt über Schlafprobleme.',
+            'Sie hat Schwierigkeiten beim Einschlafen.',
+            'Nachts wacht sie mehrfach auf.',
+            'Am Tag fühlt sie sich erschöpft.',
+            'Die Beschwerden bestehen seit mehreren Wochen.',
+            'Es liegt eine primäre Schlafstörung vor.'
+        ]},
+        { id: 64, date: '2026-03-05', solution: 'Schlafapnoe', hints: [
+            'Ein 55-jähriger Mann wird wegen starker Tagesmüdigkeit vorgestellt.',
+            'Die Partnerin berichtet über lautes Schnarchen.',
+            'Es kommt zu nächtlichen Atempausen.',
+            'Am Morgen klagt er über Kopfschmerzen.',
+            'Der Patient ist übergewichtig.',
+            'Die Diagnose wird mittels Schlaflabor bestätigt.'
+        ]},
+        { id: 65, date: '2026-03-06', solution: 'Adipositas', hints: [
+            'Ein 40-jähriger Patient stellt sich zur Routineuntersuchung vor.',
+            'Er berichtet über geringe körperliche Aktivität.',
+            'Die Ernährung ist kalorienreich.',
+            'Bei der Untersuchung fällt ein deutlich erhöhtes Körpergewicht auf.',
+            'Der Body-Mass-Index liegt über 30.',
+            'Es handelt sich um eine chronische Stoffwechselerkrankung.'
+        ]},
+        { id: 66, date: '2026-03-07', solution: 'Metabolisches Syndrom', hints: [
+            'Ein 52-jähriger Patient wird wegen erhöhter Blutwerte vorgestellt.',
+            'Er hat Übergewicht und wenig Bewegung.',
+            'Der Blutdruck ist erhöht.',
+            'Labor zeigt erhöhte Blutzucker- und Lipidwerte.',
+            'Es liegt eine Kombination mehrerer Risikofaktoren vor.',
+            'Diese Konstellation erhöht das kardiovaskuläre Risiko erheblich.'
+        ]},
+        { id: 67, date: '2026-03-08', solution: 'Cholelithiasis', hints: [
+            'Eine 47-jährige Patientin klagt über wiederkehrende Oberbauchschmerzen.',
+            'Die Beschwerden treten besonders nach fettreichen Mahlzeiten auf.',
+            'Die Schmerzen sind kolikartig und kommen in Wellen.',
+            'Gelegentlich strahlen sie in den Rücken aus.',
+            'Zwischen den Episoden ist die Patientin beschwerdefrei.',
+            'Die Sonographie zeigt echoreiche Strukturen mit Schallschatten in der Gallenblase.'
+        ]},
+        { id: 68, date: '2026-03-09', solution: 'Ileus', hints: [
+            'Ein 65-jähriger Patient klagt über Bauchschmerzen und Übelkeit.',
+            'Er berichtet über ausbleibenden Stuhlgang.',
+            'Das Abdomen ist gebläht.',
+            'Es kommt zu wiederholtem Erbrechen.',
+            'Bei der Auskultation sind kaum Darmgeräusche hörbar.',
+            'Es handelt sich um eine mechanische oder funktionelle Darmpassage-Störung.'
+        ]},
+        { id: 69, date: '2026-03-10', solution: 'Peritonitis', hints: [
+            'Ein 58-jähriger Patient klagt über starke Bauchschmerzen.',
+            'Die Schmerzen haben sich im Verlauf verstärkt.',
+            'Er wirkt schwer krank und hat Fieber.',
+            'Das Abdomen ist hart und druckschmerzhaft.',
+            'Es besteht eine ausgeprägte Abwehrspannung.',
+            'Die Klinik entspricht einer akuten Entzündung des Bauchfells.'
+        ]},
+        { id: 70, date: '2026-03-11', solution: 'Leistenhernie', hints: [
+            'Ein 60-jähriger Mann bemerkt eine Vorwölbung in der Leiste.',
+            'Die Schwellung tritt besonders beim Husten auf.',
+            'Im Liegen lässt sie sich zurückdrücken.',
+            'Es bestehen gelegentliche Schmerzen.',
+            'Die Untersuchung zeigt eine reponible Raumforderung.',
+            'Die Diagnose ist eine Hernie im Bereich des Leistenkanals.'
+        ]},
+        { id: 71, date: '2026-03-12', solution: 'Chronisch-venöse Insuffizienz', hints: [
+            'Eine 65-jährige Patientin klagt über schwere Beine am Abend.',
+            'Sie berichtet über Spannungsgefühl und Schwellungen.',
+            'Die Beschwerden bessern sich beim Hochlagern.',
+            'Die Haut am Unterschenkel zeigt bräunliche Verfärbungen.',
+            'Es finden sich erweiterte, geschlängelte Venen.',
+            'Die Ursache liegt in einer gestörten Venenfunktion mit Rückfluss.'
+        ]},
+        { id: 72, date: '2026-03-13', solution: 'Ulcus cruris', hints: [
+            'Ein 70-jähriger Patient stellt sich mit einer schlecht heilenden Wunde am Unterschenkel vor.',
+            'Die Läsion besteht seit mehreren Wochen.',
+            'Die Umgebungshaut ist verändert.',
+            'Es besteht ein chronisches Ödem.',
+            'Die Wunde ist flach und nässend.',
+            'Häufig liegt eine zugrunde liegende venöse Erkrankung vor.'
+        ]},
+        { id: 73, date: '2026-03-14', solution: 'Rachitis', hints: [
+            'Ein Kleinkind wird wegen Entwicklungsverzögerung vorgestellt.',
+            'Die Eltern berichten über Muskelschwäche.',
+            'Die Beine wirken verformt.',
+            'Das Wachstum ist verzögert.',
+            'Labor zeigt Störungen im Kalzium- und Phosphatstoffwechsel.',
+            'Die Ursache ist ein Vitamin-D-Mangel im Kindesalter.'
+        ]},
+        { id: 74, date: '2026-03-15', solution: 'Osteoporose', hints: [
+            'Eine 75-jährige Frau klagt über Rückenschmerzen.',
+            'Sie berichtet, dass sie kleiner geworden ist.',
+            'Die Beschwerden traten nach einem Bagatelltrauma auf.',
+            'Es besteht eine erhöhte Frakturanfälligkeit.',
+            'Die Knochendichte ist vermindert.',
+            'Die Erkrankung betrifft vor allem ältere Menschen.'
+        ]},
+        { id: 75, date: '2026-03-16', solution: 'Fraktur', hints: [
+            'Ein Patient stellt sich nach einem Sturz vor.',
+            'Er klagt über starke Schmerzen in einer Extremität.',
+            'Die betroffene Region ist geschwollen.',
+            'Bewegungen sind stark eingeschränkt.',
+            'Es besteht eine Fehlstellung.',
+            'Die Bildgebung zeigt eine Unterbrechung der Knochenkontinuität.'
+        ]},
+        { id: 76, date: '2026-03-17', solution: 'Luxation', hints: [
+            'Ein Patient klagt über akute Schmerzen im Gelenk.',
+            'Die Beschwerden traten nach einer plötzlichen Bewegung auf.',
+            'Das Gelenk wirkt deformiert.',
+            'Bewegungen sind kaum möglich.',
+            'Die Stellung des Gelenks ist unphysiologisch.',
+            'Die Diagnose ist eine Ausrenkung eines Gelenks.'
+        ]},
+        { id: 77, date: '2026-03-18', solution: 'Achillessehnenruptur', hints: [
+            'Ein 40-jähriger Mann verspürt beim Sport plötzlich einen starken Schmerz in der Wade.',
+            'Er beschreibt ein Gefühl wie einen Schlag von hinten.',
+            'Das Gehen ist nur eingeschränkt möglich.',
+            'Beim Abtasten zeigt sich eine Lücke im Sehnenverlauf.',
+            'Der Zehenspitzenstand ist nicht möglich.',
+            'Der Thompson-Test ist positiv.'
+        ]},
+        { id: 78, date: '2026-03-19', solution: 'Kreuzbandriss', hints: [
+            'Ein 25-jähriger Patient verletzt sich beim Sport.',
+            'Es kommt zu einer plötzlichen Drehbewegung im Knie.',
+            'Der Patient berichtet über ein „Knacken".',
+            'Das Knie schwillt rasch an.',
+            'Es besteht eine Instabilität im Gelenk.',
+            'Der vordere Schubladentest ist positiv.'
+        ]},
+        { id: 79, date: '2026-03-20', solution: 'Nikotinvergiftung', hints: [
+            'Eine 16-jährige Patientin klagt über Übelkeit und Schwindel.',
+            'Sie wirkt unruhig und zittrig.',
+            'Es besteht vermehrter Speichelfluss.',
+            'Die Herzfrequenz ist erhöht.',
+            'Die Symptome traten nach Aufnahme einer Substanz auf.',
+            'In der Anamnese findet sich der Konsum großer Mengen nikotinhaltiger Produkte.'
+        ]},
+        { id: 80, date: '2026-03-21', solution: 'Influenza', hints: [
+            'Ein 35-jähriger Patient klagt über plötzlich einsetzendes Fieber.',
+            'Er berichtet über starke Kopf- und Gliederschmerzen.',
+            'Es besteht ein trockener Husten.',
+            'Die Symptome traten innerhalb weniger Stunden auf.',
+            'Mehrere Personen im Umfeld sind ebenfalls erkrankt.',
+            'Es handelt sich um eine saisonale Virusinfektion.'
+        ]},
+        { id: 81, date: '2026-03-22', solution: 'Sarkoidose', hints: [
+            'Eine 32-jährige Frau stellt sich mit Husten und Atemnot vor.',
+            'Sie berichtet über Müdigkeit und ungewollten Gewichtsverlust.',
+            'Bei der Untersuchung fallen geschwollene Lymphknoten am Hals auf.',
+            'Die Haut zeigt erythematöse Knötchen an den Unterschenkeln.',
+            'Das Röntgenbild zeigt eine bilaterale hiläre Lymphadenopathie.',
+            'Die Biopsie zeigt nicht-verkäsende Granulome.'
+        ]},
+        { id: 82, date: '2026-03-23', solution: 'Hypothyreose', hints: [
+            'Eine 48-jährige Frau klagt über zunehmende Erschöpfung und Antriebslosigkeit.',
+            'Sie berichtet über Gewichtszunahme trotz unveränderter Ernährung.',
+            'Die Haut wirkt trocken und blass, die Haare brüchig.',
+            'Die Herzfrequenz ist erniedrigt, die Reflexe verlangsamt.',
+            'Sie friert ständig, auch bei normalen Temperaturen.',
+            'Das Labor zeigt ein erhöhtes TSH und erniedrigte freie Schilddrüsenhormone.'
+        ]},
+        { id: 83, date: '2026-03-24', solution: 'Pneumothorax', hints: [
+            'Ein 22-jähriger schlanker Mann klagt über plötzlich einsetzende Brustschmerzen.',
+            'Der Schmerz trat spontan in Ruhe auf.',
+            'Es besteht zunehmende Atemnot.',
+            'Bei der Auskultation fehlt das Atemgeräusch auf einer Seite.',
+            'Der Klopfschall ist auf der betroffenen Seite hypersonor.',
+            'Das Röntgenbild zeigt eine Lunge ohne Gefäßzeichnung am Rand.'
+        ]},
+        { id: 84, date: '2026-03-25', solution: 'Appendizitis', hints: [
+            'Ein 14-jähriges Mädchen klagt über Bauchschmerzen seit dem Morgen.',
+            'Die Schmerzen haben sich vom Nabel in den rechten Unterbauch verlagert.',
+            'Sie berichtet über Übelkeit und Appetitlosigkeit.',
+            'Die Körpertemperatur ist leicht erhöht.',
+            'Bei der Untersuchung zeigt sich ein ausgeprägter Druckschmerz im McBurney-Punkt.',
+            'Das CRP und die Leukozyten sind erhöht.'
+        ]},
+        { id: 85, date: '2026-03-26', solution: 'Vorhofflimmern', hints: [
+            'Ein 68-jähriger Mann klagt über Herzrasen und Schwindel.',
+            'Er berichtet über ein unregelmäßiges Herzschlaggefühl.',
+            'Die Beschwerden traten plötzlich auf.',
+            'Bei der Untersuchung ist der Puls unregelmäßig und variabel.',
+            'Es besteht eine leichte Atemnot bei Belastung.',
+            'Das EKG zeigt keine erkennbaren P-Wellen und eine unregelmäßige RR-Abfolge.'
+        ]},
+        { id: 86, date: '2026-03-27', solution: 'Diabetische Ketoazidose (DKA)', hints: [
+            'Ein 19-jähriger Patient wird mit Übelkeit und Erbrechen eingeliefert.',
+            'Er berichtet über starken Durst und häufiges Wasserlassen seit Tagen.',
+            'Bei der Untersuchung wirkt er dehydriert und somnolent.',
+            'Die Atmung ist tief und beschleunigt.',
+            'Es fällt ein süßlich-fruchtiger Atemgeruch auf.',
+            'Das Labor zeigt eine metabolische Azidose mit erhöhtem Blutzucker und Ketonkörpern.'
+        ]},
+        { id: 87, date: '2026-03-28', solution: 'Rheumatoide Arthritis', hints: [
+            'Eine 42-jährige Frau klagt über Schmerzen in den Fingergelenken.',
+            'Die Beschwerden sind morgens besonders schlimm und bessern sich im Tagesverlauf.',
+            'Die betroffenen Gelenke sind geschwollen und warm.',
+            'Beide Hände sind symmetrisch betroffen.',
+            'Die Patientin berichtet über eine Morgensteifigkeit von über einer Stunde.',
+            'Das Labor zeigt erhöhten Rheumafaktor und Anti-CCP-Antikörper.'
+        ]},
+        { id: 88, date: '2026-03-29', solution: 'Harnwegsinfekt', hints: [
+            'Eine 23-jährige Frau klagt über Brennen beim Wasserlassen.',
+            'Sie muss häufig und dringend zur Toilette.',
+            'Es besteht ein Druckgefühl im Unterbauch.',
+            'Fieber ist nicht vorhanden.',
+            'Der Urin ist trüb und riecht unangenehm.',
+            'Die Urinuntersuchung zeigt Leukozyten, Nitrit und Bakterien.'
+        ]},
+        { id: 89, date: '2026-03-30', solution: 'Herzinsuffizienz', hints: [
+            'Ein 72-jähriger Mann klagt über zunehmende Atemnot bei Belastung.',
+            'Er berichtet, nachts mit Luftnot aufzuwachen.',
+            'Die Knöchel sind geschwollen.',
+            'Bei der Untersuchung finden sich feuchte Rasselgeräusche basal beidseits.',
+            'Die Halsvenen sind gestaut.',
+            'Das Echokardiogramm zeigt eine reduzierte linksventrikuläre Pumpfunktion.'
+        ]},
+        { id: 90, date: '2026-03-31', solution: 'Pankreaskarzinom', hints: [
+            'Ein 65-jähriger Mann stellt sich mit Gewichtsverlust und Oberbauchschmerzen vor.',
+            'Die Schmerzen strahlen in den Rücken aus.',
+            'Er berichtet über neu aufgetretenen Diabetes mellitus.',
+            'Bei der Untersuchung fällt ein Ikterus auf.',
+            'Die Gallenblase ist tastbar vergrößert und schmerzlos.',
+            'Die Bildgebung zeigt eine Raumforderung im Pankreaskopf.'
+        ]},
+        { id: 91, date: '2026-04-01', solution: 'Subarachnoidalblutung', hints: [
+            'Ein 50-jähriger Mann klagt über den schlimmsten Kopfschmerz seines Lebens.',
+            'Der Schmerz trat schlagartig auf.',
+            'Er berichtet über kurzzeitigen Bewusstseinsverlust.',
+            'Es besteht eine Lichtempfindlichkeit und Nackenschmerzen.',
+            'Bei der Untersuchung zeigt sich ein Meningismus.',
+            'Das CT zeigt hyperdenses Material in den basalen Zisternen.'
+        ]},
+        { id: 92, date: '2026-04-02', solution: 'Morbus Addison', hints: [
+            'Ein 38-jähriger Mann klagt über chronische Müdigkeit und Schwäche.',
+            'Er berichtet über Übelkeit, Gewichtsverlust und Appetitlosigkeit.',
+            'Der Blutdruck ist erniedrigt.',
+            'Bei der Untersuchung fällt eine Hyperpigmentierung der Haut auf.',
+            'Das Labor zeigt eine Hyponatriämie und Hyperkaliämie.',
+            'Der Kortisol-Stimulationstest zeigt eine unzureichende Nebennierenreaktion.'
+        ]},
+        { id: 93, date: '2026-04-03', solution: 'Aortendissektion', hints: [
+            'Ein 58-jähriger hypertensiver Mann klagt über plötzlich einsetzende Brustschmerzen.',
+            'Der Schmerz wird als reißend und wandernd beschrieben.',
+            'Er strahlt in den Rücken und zwischen die Schulterblätter aus.',
+            'Der Blutdruck ist auf beiden Armen unterschiedlich.',
+            'Die Pulse an den Extremitäten sind asymmetrisch.',
+            'Die CT-Angiographie zeigt ein Intimaflap in der Aorta.'
+        ]},
+        { id: 94, date: '2026-04-04', solution: 'Zöliakie', hints: [
+            'Eine 28-jährige Frau klagt über chronischen Durchfall und Blähungen.',
+            'Sie berichtet über Bauchschmerzen nach Mahlzeiten.',
+            'Es besteht ein ungewollter Gewichtsverlust.',
+            'Labor zeigt eine Eisenmangelanämie und erhöhte Leberwerte.',
+            'Antikörper gegen Gewebstransglutaminase sind positiv.',
+            'Die Dünndarmbiopsie zeigt eine Zottenatrophie.'
+        ]},
+        { id: 95, date: '2026-04-05', solution: 'Ektope Schwangerschaft', hints: [
+            'Eine 27-jährige Frau klagt über einseitige Unterbauchschmerzen.',
+            'Die letzte Menstruation blieb aus.',
+            'Es besteht eine leichte vaginale Blutung.',
+            'Der Schwangerschaftstest ist positiv.',
+            'Die Transvaginalsonographie zeigt keine intrauterine Fruchtanlage.',
+            'Im Adnexbereich ist eine Raumforderung mit freier Flüssigkeit erkennbar.'
+        ]},
+        { id: 96, date: '2026-04-06', solution: 'Guillain-Barré-Syndrom', hints: [
+            'Ein 35-jähriger Mann bemerkt ein aufsteigendes Kribbeln in den Beinen.',
+            'Wenige Tage zuvor hatte er einen gastrointestinalen Infekt.',
+            'Die Schwäche schreitet von den Beinen nach oben fort.',
+            'Die Muskeleigenreflexe sind abgeschwächt oder aufgehoben.',
+            'Das Gehen fällt zunehmend schwerer.',
+            'Im Liquor zeigt sich eine zytoalbuminäre Dissoziation.'
+        ]},
+        { id: 97, date: '2026-04-07', solution: 'Kawasaki-Syndrom', hints: [
+            'Ein 4-jähriges Kind hat seit fünf Tagen hohes Fieber.',
+            'Die Augen sind gerötet ohne Ausfluss.',
+            'Die Lippen sind trocken, gerötet und gerissen.',
+            'Die Zunge erscheint erdbeerartig.',
+            'Hände und Füße sind geschwollen und gerötet.',
+            'Es zeigen sich zervikale Lymphknotenschwellungen.'
+        ]},
+        { id: 98, date: '2026-04-08', solution: 'Sichelzellanämie', hints: [
+            'Ein 8-jähriges Kind wird mit starken Schmerzen in Armen und Beinen vorgestellt.',
+            'Es besteht seit der Geburt eine bekannte Anämie.',
+            'Die Eltern berichten über wiederkehrende Schmerzkrisen.',
+            'Bei der Untersuchung fällt eine Milzvergrößerung auf.',
+            'Das Blutbild zeigt sichelförmige Erythrozyten.',
+            'Die Hämoglobinelektrophorese bestätigt die Diagnose.'
+        ]},
+        { id: 99, date: '2026-04-09', solution: 'Cushing-Syndrom', hints: [
+            'Eine 35-jährige Frau klagt über Gewichtszunahme und Schwäche.',
+            'Sie berichtet über Stimmungsschwankungen und Schlafstörungen.',
+            'Bei der Untersuchung fällt eine stammbetonte Adipositas auf.',
+            'Das Gesicht ist rundlich und gerötet.',
+            'Es zeigen sich rötlich-violette Striae am Bauch.',
+            'Der Kortisol-Tagesprofil und der Dexamethason-Suppressionstest sind pathologisch.'
+        ]},
+        { id: 100, date: '2026-04-10', solution: 'Lungenabszess', hints: [
+            'Ein 55-jähriger alkoholkranker Mann klagt über Fieber und Husten.',
+            'Er berichtet über faulig riechenden Auswurf.',
+            'Die Beschwerden bestehen seit mehreren Wochen.',
+            'Er hat deutlich an Gewicht verloren.',
+            'Bei der Auskultation zeigen sich gedämpfte Atemgeräusche.',
+            'Das Röntgenbild zeigt eine Kaverne mit Flüssigkeitsspiegel.'
+        ]},
+        { id: 101, date: '2026-04-11', solution: 'Myasthenia gravis', hints: [
+            'Eine 30-jährige Frau bemerkt eine zunehmende Augenlidschwäche.',
+            'Die Beschwerden sind abends schlimmer als morgens.',
+            'Sie berichtet über Doppelbilder und Schluckbeschwerden.',
+            'Die Muskelschwäche nimmt bei wiederholter Belastung zu.',
+            'Der Tensilon-Test führt zu einer vorübergehenden Besserung.',
+            'Es werden Antikörper gegen Acetylcholinrezeptoren nachgewiesen.'
+        ]}
+    ];
+
+
+    // ===== SPIELZUSTAND =====
+    let currentPuzzleIndex = 0;
+    let revealedCount      = 1;
+    let usedGuesses        = new Set();
+
+    // ===== DOM-REFERENZEN =====
+    const input   = document.getElementById('guess-input');
+    const suggBox = document.getElementById('suggestions');
+    let selectedIndex = -1;
+
+
+    // ===== HILFSFUNKTION: HEUTIGES DATUM =====
+    function getToday() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    }
+
+
+    // ===== NAVIGATION =====
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if (id === 'archive') renderArchive();
+        if (id === 'stats')   renderStats();
+    }
+
+
+    // ===== SPIEL LADEN =====
+    function loadDaily() {
+        const today = getToday();
+        let puzzle  = puzzles.find(p => p.date === today);
+        if (!puzzle) {
+            const past = puzzles.filter(p => p.date <= today);
+            puzzle = past[past.length - 1];
+        }
+        if (!puzzle) puzzle = puzzles[0];
+        initGame(puzzle);
+    }
+
+    function initGame(puzzle) {
+        revealedCount = 1;
+        usedGuesses   = new Set();
+
+        document.getElementById('meta-info').innerText  = `Arztdle #${puzzle.id} - ${puzzle.date}`;
+        document.getElementById('status-msg').innerText = '';
+        document.getElementById('countdown-box').style.display = 'none';
+        input.value = '';
+        input.focus();
+
+        const wrapper = document.getElementById('hint-wrapper');
+        wrapper.innerHTML = '';
+        puzzle.hints.forEach((h, i) => {
+            const div       = document.createElement('div');
+            div.className   = `hint-box ${i === 0 ? 'visible' : ''}`;
+            div.id          = `h-${i}`;
+            div.innerText   = h;
+            wrapper.appendChild(div);
+        });
+
+        currentPuzzleIndex = puzzles.indexOf(puzzle);
+    }
+
+
+    // ===== ANTWORT PRÜFEN =====
+    function checkAnswer() {
+        const guess    = input.value.trim().toLowerCase();
+        const solution = puzzles[currentPuzzleIndex].solution.toLowerCase();
+        const msg      = document.getElementById('status-msg');
+
+        if (!guess) return;
+
+        if (usedGuesses.has(guess)) {
+            msg.innerText   = 'Diese Diagnose hast du bereits versucht.';
+            msg.style.color = '#999';
+            input.value     = '';
+            return;
+        }
+
+        usedGuesses.add(guess);
+
+        if (usedGuesses.size === 1) {
+            localStorage.setItem('statTotal', parseInt(localStorage.getItem('statTotal') || '0') + 1);
+        }
+
+        document.querySelectorAll('.suggestion').forEach(s => {
+            if (s.innerText.toLowerCase() === guess) {
+                s.style.color         = '#bbb';
+                s.style.pointerEvents = 'none';
+            }
+        });
+
+        if (guess === solution) {
+            msg.innerText   = 'Richtig! Hervorragende Diagnose. 🩺';
+            msg.style.color = 'var(--success)';
+            updateStreak(true);
+            startCountdown();
+            localStorage.setItem('statSolved', parseInt(localStorage.getItem('statSolved') || '0') + 1);
+            localStorage.setItem('statHints',  parseInt(localStorage.getItem('statHints')  || '0') + revealedCount);
+            confetti({ particleCount: 120, spread: 70, origin: { y: 0.8 }, colors: ['#2a9d8f', '#3aad4e', '#6bbf72', '#e8cc72'] });
+            for (let i = 0; i < 6; i++) {
+                const el = document.getElementById(`h-${i}`);
+                if (el) el.classList.add('visible');
+            }
+        } else {
+            if (revealedCount < puzzles[currentPuzzleIndex].hints.length) {
+                document.getElementById(`h-${revealedCount}`).classList.add('visible');
+                revealedCount++;
+                msg.innerText   = 'Falsch! Ein weiterer Hinweis wurde freigeschaltet.';
+                msg.style.color = 'orange';
+            } else {
+                msg.innerText   = `Leider nicht richtig. Die Lösung war: ${puzzles[currentPuzzleIndex].solution}`;
+                msg.style.color = 'var(--error)';
+            }
+        }
+        input.value = '';
+    }
+
+
+    // ===== AUTOCOMPLETE =====
+    input.addEventListener('keydown', (e) => {
+        const suggestions = suggBox.querySelectorAll('.suggestion');
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+            suggestions.forEach((s, i) => {
+                s.style.background = i === selectedIndex ? '#f0f0f0' : '';
+                if (i === selectedIndex) s.scrollIntoView({ block: 'nearest' });
+            });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedIndex = Math.max(selectedIndex - 1, -1);
+            suggestions.forEach((s, i) => {
+                s.style.background = i === selectedIndex ? '#f0f0f0' : '';
+                if (i === selectedIndex) s.scrollIntoView({ block: 'nearest' });
+            });
+        } else if (e.key === 'Enter') {
+            if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+                input.value   = suggestions[selectedIndex].innerText;
+                suggBox.innerHTML = '';
+                selectedIndex = -1;
+                input.focus();
+            } else {
+                suggBox.innerHTML = '';
+                checkAnswer();
+            }
+        } else {
+            selectedIndex = -1;
+        }
+    });
+
+    input.addEventListener('input', () => {
+        const val = input.value.toLowerCase();
+        suggBox.innerHTML = '';
+        selectedIndex     = -1;
+        if (!val) return;
+
+        const matches = allDiagnoses.filter(d => d.toLowerCase().includes(val)).slice(0, 8);
+        matches.forEach(m => {
+            const div        = document.createElement('div');
+            div.className    = 'suggestion';
+            const alreadyUsed = usedGuesses.has(m.toLowerCase());
+            div.innerText    = m;
+            if (alreadyUsed) {
+                div.style.color         = '#bbb';
+                div.style.pointerEvents = 'none';
+            }
+            div.onclick = () => {
+                if (alreadyUsed) return;
+                input.value       = m;
+                suggBox.innerHTML = '';
+                input.focus();
+            };
+            suggBox.appendChild(div);
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target !== input) suggBox.innerHTML = '';
+    });
+
+
+    // ===== ARCHIV =====
+    function renderArchive() {
+        const today = getToday();
+        const cont  = document.getElementById('archive-content');
+        cont.innerHTML = '';
+        puzzles
+            .filter(p => p.date <= today)
+            .forEach(p => {
+                const div     = document.createElement('div');
+                div.className = 'archive-item';
+                div.innerHTML = `<span>#${p.id} - ${p.date}</span><button style="background:var(--accent);color:white;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:bold" onclick="initGameById(${p.id})">Spielen</button>`;
+                cont.appendChild(div);
+            });
+    }
+
+    function initGameById(id) {
+        const p = puzzles.find(x => x.id === id);
+        initGame(p);
+        showSection('play');
+    }
+
+
+    // ===== STATISTIK =====
+    function renderStats() {
+        const total      = parseInt(localStorage.getItem('statTotal')  || '0');
+        const solved     = parseInt(localStorage.getItem('statSolved') || '0');
+        const hintsTotal = parseInt(localStorage.getItem('statHints')  || '0');
+        const streak     = parseInt(localStorage.getItem('streak')     || '0');
+        const rate       = total  > 0 ? Math.round((solved / total) * 100) : 0;
+        const avgHints   = solved > 0 ? (hintsTotal / solved).toFixed(1)   : '-';
+
+        document.getElementById('stats-content').innerHTML = `
+            <div class="stats-grid">
+                <div class="stats-box"><div class="number">${total}</div><div class="label">Gespielte Rätsel</div></div>
+                <div class="stats-box"><div class="number">${solved}</div><div class="label">Gelöst</div></div>
+                <div class="stats-box"><div class="number">${rate}%</div><div class="label">Erfolgsquote</div></div>
+                <div class="stats-box"><div class="number">${avgHints}</div><div class="label">Ø Hinweise</div></div>
+                <div class="stats-box" style="grid-column:span 2"><div class="number">🔥 ${streak}</div><div class="label">Aktuelle Streak</div></div>
+            </div>`;
+    }
+
+
+    // ===== STREAK =====
+    function updateStreak(solved) {
+        const today     = getToday();
+        const lastPlayed = localStorage.getItem('lastPlayed');
+        let streak      = parseInt(localStorage.getItem('streak') || '0');
+
+        if (solved) {
+            if (lastPlayed !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+                streak = lastPlayed === yStr ? streak + 1 : 1;
+                localStorage.setItem('streak',     streak);
+                localStorage.setItem('lastPlayed', today);
+            }
+        }
+
+        const banner = document.getElementById('streak-banner');
+        banner.innerText = streak > 0 ? `🔥 ${streak} Tag${streak > 1 ? 'e' : ''} in Folge` : '';
+    }
+
+
+    // ===== COUNTDOWN =====
+    function startCountdown() {
+        document.getElementById('countdown-box').style.display = 'block';
+        function update() {
+            const now      = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            const diff = tomorrow - now;
+            const h    = String(Math.floor(diff / 3600000)).padStart(2, '0');
+            const m    = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            const s    = String(Math.floor((diff % 60000)  / 1000)).padStart(2, '0');
+            document.getElementById('countdown-timer').innerText = `${h}:${m}:${s}`;
+        }
+        update();
+        setInterval(update, 1000);
+    }
+
+
+    // ===== DARK MODE =====
+    function toggleDark() {
+        document.body.classList.toggle('dark');
+        const btn    = document.getElementById('dark-mode-btn');
+        const isDark = document.body.classList.contains('dark');
+        btn.innerText = isDark ? '☀️' : '🌙';
+        localStorage.setItem('darkMode', isDark);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark');
+        document.getElementById('dark-mode-btn').innerText = '☀️';
+    }
+
+
+    // ===== START =====
+    updateStreak(false);
+    loadDaily();
+
+</script>
+</body>
+</html>
