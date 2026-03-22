@@ -2207,6 +2207,7 @@
 
     let currentPuzzleIndex = 0;
     let revealedCount = 1;
+    let usedGuesses = new Set();
 
     // --- LOGIK ---
     function showSection(id) {
@@ -2229,6 +2230,7 @@
 }
     function initGame(puzzle) {
         revealedCount = 1;
+        usedGuesses = new Set();
         document.getElementById('meta-info').innerText = `Arztdle #${puzzle.id} - ${puzzle.date}`;
         document.getElementById('status-msg').innerText = "";
         document.getElementById('guess-input').value = "";
@@ -2246,54 +2248,79 @@
     }
 
     function checkAnswer() {
-        const input = document.getElementById('guess-input');
-        const guess = input.value.trim().toLowerCase();
-        const solution = puzzles[currentPuzzleIndex].solution.toLowerCase();
-        const msg = document.getElementById('status-msg');
+    const input = document.getElementById('guess-input');
+    const guess = input.value.trim().toLowerCase();
+    const solution = puzzles[currentPuzzleIndex].solution.toLowerCase();
+    const msg = document.getElementById('status-msg');
 
-        if(guess === solution) {
-            msg.innerText = "Richtig! Hervorragende Diagnose. 🩺";
-            msg.style.color = "var(--success)";
-            // Zeige alle Hinweise
-            for(let i=0; i<6; i++) {
-                let el = document.getElementById(`h-${i}`);
-                if(el) el.classList.add('visible');
-            }
-        } else {
-            if(revealedCount < puzzles[currentPuzzleIndex].hints.length) {
-                document.getElementById(`h-${revealedCount}`).classList.add('visible');
-                revealedCount++;
-                msg.innerText = "Falsch! Ein weiterer Hinweis wurde freigeschaltet.";
-                msg.style.color = "orange";
-            } else {
-                msg.innerText = `Leider nicht richtig. Die Lösung war: ${puzzles[currentPuzzleIndex].solution}`;
-                msg.style.color = "var(--error)";
-            }
-        }
+    if (!guess) return;
+
+    // Bereits geraten?
+    if (usedGuesses.has(guess)) {
+        msg.innerText = "Diese Diagnose hast du bereits versucht.";
+        msg.style.color = "#999";
         input.value = "";
+        return;
     }
+
+    usedGuesses.add(guess);
+
+    // Geratene Suggestion ausgrauen
+    document.querySelectorAll('.suggestion').forEach(s => {
+        if (s.innerText.toLowerCase() === guess) {
+            s.style.color = "#bbb";
+            s.style.pointerEvents = "none";
+        }
+    });
+
+    if (guess === solution) {
+        msg.innerText = "Richtig! Hervorragende Diagnose. 🩺";
+        msg.style.color = "var(--success)";
+        for (let i = 0; i < 6; i++) {
+            let el = document.getElementById(`h-${i}`);
+            if (el) el.classList.add('visible');
+        }
+    } else {
+        if (revealedCount < puzzles[currentPuzzleIndex].hints.length) {
+            document.getElementById(`h-${revealedCount}`).classList.add('visible');
+            revealedCount++;
+            msg.innerText = "Falsch! Ein weiterer Hinweis wurde freigeschaltet.";
+            msg.style.color = "orange";
+        } else {
+            msg.innerText = `Leider nicht richtig. Die Lösung war: ${puzzles[currentPuzzleIndex].solution}`;
+            msg.style.color = "var(--error)";
+        }
+    }
+    input.value = "";
+}
 
     // --- AUTOCOMPLETE LOGIK ---
     const input = document.getElementById('guess-input');
     const suggBox = document.getElementById('suggestions');
 
     input.addEventListener('input', () => {
-        const val = input.value.toLowerCase();
-        suggBox.innerHTML = "";
-        if(!val) return;
+    const val = input.value.toLowerCase();
+    suggBox.innerHTML = "";
+    if (!val) return;
 
-        const matches = allDiagnoses.filter(d => d.toLowerCase().includes(val)).slice(0, 8);
-        matches.forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'suggestion';
-            div.innerText = m;
-            div.onclick = () => {
-                input.value = m;
-                suggBox.innerHTML = "";
-            };
-            suggBox.appendChild(div);
-        });
+    const matches = allDiagnoses.filter(d => d.toLowerCase().includes(val)).slice(0, 8);
+    matches.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'suggestion';
+        const alreadyUsed = usedGuesses.has(m.toLowerCase());
+        div.innerText = m;
+        if (alreadyUsed) {
+            div.style.color = "#bbb";
+            div.style.pointerEvents = "none";
+        }
+        div.onclick = () => {
+            if (alreadyUsed) return;
+            input.value = m;
+            suggBox.innerHTML = "";
+        };
+        suggBox.appendChild(div);
     });
+});
 
     document.addEventListener('click', (e) => {
         if(e.target !== input) suggBox.innerHTML = "";
