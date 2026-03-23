@@ -371,6 +371,12 @@
             border-color: #e8cc72;
             color: #e0e0e0;
         }
+
+        body.dark #leaderboard-content table tr { border-color: #2a2a4a; }
+        body.dark #leaderboard-content table tr[style*="background:#f0f7ff"] { 
+            background: #1a1a2e !important; 
+        }
+        body.dark #leaderboard-content table th { color: #aaa; border-color: #2a2a4a; }
     </style>
 </head>
 <body>
@@ -425,7 +431,7 @@
             <p style="font-size:0.9rem;color:#888">Gib deinen Namen ein, um auf der Bestenliste zu erscheinen:</p>
             <div style="display:flex;gap:10px;justify-content:center">
                 <input type="text" id="leaderboard-name-input" placeholder="Dein Name..." style="max-width:200px" autocomplete="off">
-                <button id="submit-btn" onclick="saveLeaderboardName()">Speichern</button>
+                <button onclick="saveLeaderboardName()" style="background:var(--accent);color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:bold;cursor:pointer;">Speichern</button>
             </div>
             <div id="leaderboard-current-name" style="margin-top:10px;font-size:0.85rem;color:#888"></div>
         </div>
@@ -1814,6 +1820,10 @@
             done[puzzles[currentPuzzleIndex].id]                        = solved ? 'solved' : 'failed';
             done[puzzles[currentPuzzleIndex].id + '_attempts']          = revealedCount;
             localStorage.setItem('completedPuzzles', JSON.stringify(done));
+
+            // Leaderboard automatisch aktualisieren falls Name vorhanden
+            const lbName = localStorage.getItem('leaderboardName');
+            if (finished && lbName) pushLeaderboardEntry(lbName);
         }
     }
 
