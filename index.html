@@ -381,6 +381,7 @@
     <a onclick="showSection('archive')">Archiv</a>
     <a onclick="showSection('stats')">Statistik</a>
     <a onclick="showSection('info')">Info</a>
+    <a onclick="showSection('leaderboard')">Bestenliste</a>
     <button id="dark-mode-btn" onclick="toggleDark()">🌙</button>
 </nav>
 
@@ -415,6 +416,20 @@
     <div id="stats" class="section">
         <h1>Meine Statistik</h1>
         <div id="stats-content"></div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderboard" class="section">
+        <h1>🏆 Bestenliste</h1>
+        <div id="leaderboard-name-area" style="margin-bottom:20px">
+            <p style="font-size:0.9rem;color:#888">Gib deinen Namen ein, um auf der Bestenliste zu erscheinen:</p>
+            <div style="display:flex;gap:10px;justify-content:center">
+                <input type="text" id="leaderboard-name-input" placeholder="Dein Name..." style="max-width:200px" autocomplete="off">
+                <button id="submit-btn" onclick="saveLeaderboardName()">Speichern</button>
+            </div>
+            <div id="leaderboard-current-name" style="margin-top:10px;font-size:0.85rem;color:#888"></div>
+        </div>
+        <div id="leaderboard-content"></div>
     </div>
 
     <!-- INFO -->
@@ -1810,6 +1825,7 @@
         if (id === 'archive') renderArchive();
         if (id === 'stats')   renderStats();
         if (id === 'play')    loadDaily();
+        if (id === 'leaderboard') renderLeaderboard();
     }
 
 
@@ -2156,6 +2172,97 @@
     }
 
 
+    // ===== LEADERBOARD =====
+        async function saveLeaderboardName() {
+            const nameInput = document.getElementById('leaderboard-name-input');
+            const name = nameInput.value.trim();
+            if (!name) return;
+        
+            localStorage.setItem('leaderboardName', name);
+            await pushLeaderboardEntry(name);
+            nameInput.value = '';
+            renderLeaderboard();
+        }
+        
+        async function pushLeaderboardEntry(name) {
+            const total    = parseInt(localStorage.getItem('statTotal')  || '0');
+            const solved   = parseInt(localStorage.getItem('statSolved') || '0');
+            const hints    = parseInt(localStorage.getItem('statHints')  || '0');
+            const streak   = parseInt(localStorage.getItem('streak')     || '0');
+            const avgHints = solved > 0 ? parseFloat((hints / solved).toFixed(1)) : 0;
+        
+            try {
+                await window.storage.set(
+                    `leaderboard:${name}`,
+                    JSON.stringify({ name, total, solved, avgHints, streak, updatedAt: Date.now() }),
+                    true
+                );
+            } catch (e) {
+                console.error('Leaderboard-Fehler:', e);
+            }
+        }
+        
+        async function renderLeaderboard() {
+            const cont       = document.getElementById('leaderboard-content');
+            const savedName  = localStorage.getItem('leaderboardName');
+        
+            // Aktuellen Namen anzeigen
+            const nameLabel  = document.getElementById('leaderboard-current-name');
+            nameLabel.innerText = savedName ? `Du bist eingetragen als: ${savedName}` : '';
+        
+            cont.innerHTML = '<p style="color:#888;font-size:0.9rem">Lade Bestenliste...</p>';
+        
+            try {
+                const result = await window.storage.list('leaderboard:', true);
+                if (!result || !result.keys || result.keys.length === 0) {
+                    cont.innerHTML = '<p style="color:#888;font-size:0.9rem">Noch keine Einträge vorhanden.</p>';
+                    return;
+                }
+        
+                const entries = [];
+                for (const key of result.keys) {
+                    try {
+                        const entry = await window.storage.get(key, true);
+                        if (entry) entries.push(JSON.parse(entry.value));
+                    } catch (e) { /* Eintrag überspringen */ }
+                }
+        
+                // Sortieren nach gelösten Rätseln (absteigend)
+                entries.sort((a, b) => b.solved - a.solved || b.streak - a.streak);
+        
+                const table = `
+                    <table style="width:100%;border-collapse:collapse;font-size:0.88rem">
+                        <thead>
+                            <tr style="border-bottom:2px solid #e0e0e0;color:#888;text-transform:uppercase;letter-spacing:1px;font-size:0.75rem">
+                                <th style="padding:10px 6px;text-align:center">#</th>
+                                <th style="padding:10px 6px;text-align:left">Name</th>
+                                <th style="padding:10px 6px;text-align:center">Gespielt</th>
+                                <th style="padding:10px 6px;text-align:center">Gelöst</th>
+                                <th style="padding:10px 6px;text-align:center">Ø Hinweise</th>
+                                <th style="padding:10px 6px;text-align:center">Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${entries.map((e, i) => `
+                                <tr style="border-bottom:1px solid #eee;${e.name === savedName ? 'background:#f0f7ff;font-weight:bold' : ''}">
+                                    <td style="padding:10px 6px;text-align:center">${i + 1}</td>
+                                    <td style="padding:10px 6px">${e.name === savedName ? '⭐ ' : ''}${e.name}</td>
+                                    <td style="padding:10px 6px;text-align:center">${e.total}</td>
+                                    <td style="padding:10px 6px;text-align:center">${e.solved}</td>
+                                    <td style="padding:10px 6px;text-align:center">${e.avgHints || '-'}</td>
+                                    <td style="padding:10px 6px;text-align:center">🔥 ${e.streak}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>`;
+        
+                cont.innerHTML = table;
+        
+            } catch (e) {
+                cont.innerHTML = '<p style="color:#c0392b;font-size:0.9rem">Bestenliste konnte nicht geladen werden.</p>';
+            }
+        }
+    
     // ===== START =====
     updateStreak(false);
     loadDaily();
