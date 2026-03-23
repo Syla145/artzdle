@@ -1796,7 +1796,8 @@
 
         if (finished) {
             const done = JSON.parse(localStorage.getItem('completedPuzzles') || '{}');
-            done[puzzles[currentPuzzleIndex].id] = solved ? 'solved' : 'failed';
+            done[puzzles[currentPuzzleIndex].id]                        = solved ? 'solved' : 'failed';
+            done[puzzles[currentPuzzleIndex].id + '_attempts']          = revealedCount;
             localStorage.setItem('completedPuzzles', JSON.stringify(done));
         }
     }
@@ -1861,6 +1862,8 @@
         document.getElementById('status-msg').innerText = '';
         document.getElementById('status-msg').style.color = '';
         document.getElementById('countdown-box').style.display = 'none';
+        document.getElementById('guess-input').disabled = false;
+        document.getElementById('submit-btn').disabled  = false;
         input.value = '';
         input.focus();
 
@@ -2027,10 +2030,33 @@
     }
 
     function initGameById(id) {
-        const p = puzzles.find(x => x.id === id);
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('play').classList.add('active');
-        initGame(p);
+    const p = puzzles.find(x => x.id === id);
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('play').classList.add('active');
+    initGame(p);
+
+        // Prüfen ob bereits abgeschlossen
+        const done   = JSON.parse(localStorage.getItem('completedPuzzles') || '{}');
+        const status = done[id];
+        if (status) {
+            const msg = document.getElementById('status-msg');
+            // Wie viele Hinweise wurden damals gezeigt?
+            const attempts = done[id + '_attempts'] || '?';
+            if (status === 'solved') {
+                msg.innerText   = `Du hast dieses Rätsel bereits in ${attempts} Versuch${attempts !== 1 ? 'en' : ''} gelöst. 🩺`;
+                msg.style.color = 'var(--success)';
+            } else {
+                msg.innerText   = 'Du hast dieses Rätsel leider nicht geschafft.';
+                msg.style.color = 'var(--error)';
+            }
+            // Alle Hinweise anzeigen und Eingabe sperren
+            for (let i = 0; i < p.hints.length; i++) {
+                const el = document.getElementById(`h-${i}`);
+                if (el) el.classList.add('visible');
+            }
+            document.getElementById('guess-input').disabled = true;
+            document.getElementById('submit-btn').disabled  = true;
+        }
     }
 
 
