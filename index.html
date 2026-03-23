@@ -1982,7 +1982,9 @@
         selectedIndex     = -1;
         if (!val) return;
 
-        const matches = allDiagnoses.filter(d => d.toLowerCase().includes(val)).slice(0, 8);
+        const startsWith = allDiagnoses.filter(d => d.toLowerCase().startsWith(val));
+        const contains   = allDiagnoses.filter(d => !d.toLowerCase().startsWith(val) && d.toLowerCase().includes(val));
+        const matches    = [...startsWith, ...contains].slice(0, 8);
         matches.forEach(m => {
             const div         = document.createElement('div');
             div.className     = 'suggestion';
