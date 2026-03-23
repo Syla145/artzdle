@@ -1786,13 +1786,19 @@
 
     // ===== FORTSCHRITT SPEICHERN =====
     function saveDailyProgress(finished, solved) {
-        localStorage.setItem('dailyProgress', JSON.stringify({
-            date:          getToday(),
-            revealedCount: revealedCount,
-            usedGuesses:   [...usedGuesses],
-            finished:      finished,
-            solved:        solved
-        }));
+    localStorage.setItem('dailyProgress', JSON.stringify({
+        date:          getToday(),
+        revealedCount: revealedCount,
+        usedGuesses:   [...usedGuesses],
+        finished:      finished,
+        solved:        solved
+    }));
+
+        if (finished) {
+            const done = JSON.parse(localStorage.getItem('completedPuzzles') || '{}');
+            done[puzzles[currentPuzzleIndex].id] = solved ? 'solved' : 'failed';
+            localStorage.setItem('completedPuzzles', JSON.stringify(done));
+        }
     }
 
 
@@ -2008,7 +2014,12 @@
             .forEach(p => {
                 const div     = document.createElement('div');
                 div.className = 'archive-item';
-                div.innerHTML = `<span>#${p.id} - ${p.date}</span>
+                const done   = JSON.parse(localStorage.getItem('completedPuzzles') || '{}');
+                const status = done[p.id];
+                const badge  = status === 'solved'  ? ' <span style="color:#27ae60;font-size:1.1rem">✓</span>'
+                             : status === 'failed'  ? ' <span style="color:#c0392b;font-size:1.1rem">✗</span>'
+                             : '';
+                div.innerHTML = `<span>#${p.id} - ${p.date}${badge}</span>
                     <button style="background:var(--accent);color:white;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:bold"
                         onclick="initGameById(${p.id})">Spielen</button>`;
                 cont.appendChild(div);
