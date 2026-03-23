@@ -2339,20 +2339,32 @@
 
     // FIX: saveLeaderboardName() war komplett fehlend
     async function saveLeaderboardName() {
-        const nameInput = document.getElementById('leaderboard-name-input');
-        const name      = nameInput.value.trim();
-        if (!name) return alert('Bitte gib einen Namen ein.');
-        if (!currentUser) {
-            document.getElementById('auth-modal').classList.add('visible');
-            return;
-        }
-        localStorage.setItem('leaderboardName', name);
-        document.getElementById('leaderboard-current-name').innerText = `Dein Name: ${name}`;
-        nameInput.value = '';
-        await pushLeaderboardEntry(name);
-        await renderLeaderboard();
+    const nameInput = document.getElementById('leaderboard-name-input');
+    const name      = nameInput.value.trim();
+    if (!name) return alert('Bitte gib einen Namen ein.');
+    if (!currentUser) {
+        document.getElementById('auth-modal').classList.add('visible');
+        return;
     }
 
+    // Prüfen ob Name bereits vergeben ist
+    const { data: existing } = await sb
+        .from('leaderboard')
+        .select('user_id')
+        .eq('name', name)
+        .maybeSingle();
+
+    if (existing && existing.user_id !== currentUser.id) {
+        alert('Dieser Name ist bereits vergeben. Bitte wähle einen anderen.');
+        return;
+    }
+
+    localStorage.setItem('leaderboardName', name);
+    document.getElementById('leaderboard-current-name').innerText = `Dein Name: ${name}`;
+    nameInput.value = '';
+    await pushLeaderboardEntry(name);
+    await renderLeaderboard();
+}
     async function pushLeaderboardEntry(name) {
         if (!currentUser) return;
 
