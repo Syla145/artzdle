@@ -2043,10 +2043,10 @@
             // Wie viele Hinweise wurden damals gezeigt?
             const attempts = done[id + '_attempts'] || '?';
             if (status === 'solved') {
-                msg.innerText   = `Du hast dieses Rätsel bereits in ${attempts} Versuch${attempts !== 1 ? 'en' : ''} gelöst. 🩺`;
+                msg.innerHTML   = `Du hast dieses Rätsel bereits in ${attempts} Versuch${attempts !== 1 ? 'en' : ''} gelöst. 🩺<br><span style="font-weight:normal;font-size:0.9rem;color:#888">Die Lösung war: ${p.solution}</span>`;
                 msg.style.color = 'var(--success)';
             } else {
-                msg.innerText   = 'Du hast dieses Rätsel leider nicht geschafft.';
+                msg.innerHTML   = `Du hast dieses Rätsel leider nicht geschafft.<br><span style="font-weight:normal;font-size:0.9rem;color:#888">Die Lösung war: ${p.solution}</span>`;
                 msg.style.color = 'var(--error)';
             }
             // Alle Hinweise anzeigen und Eingabe sperren
