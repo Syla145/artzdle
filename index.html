@@ -2440,88 +2440,87 @@
     }
 
     async function renderLeaderboard() {
-        const content    = document.getElementById('leaderboard-content');
-        const nameArea   = document.getElementById('leaderboard-name-area');
-        const authPrompt = document.getElementById('leaderboard-auth-prompt');
+    const content    = document.getElementById('leaderboard-content');
+    const nameArea   = document.getElementById('leaderboard-name-area');
+    const authPrompt = document.getElementById('leaderboard-auth-prompt');
 
-        // FIX: Leaderboard-Name-Bereich komplett neu aufbauen je nach Status
-        if (!currentUser) {
-            nameArea.style.display   = 'none';
-            nameArea.innerHTML       = '';
-            authPrompt.style.display = 'block';
-        } else {
-            authPrompt.style.display = 'none';
-            nameArea.style.display   = 'block';
-            const savedName = localStorage.getItem('leaderboardName');
-            if (savedName) {
-                pushLeaderboardEntry(savedName); // Stats beim Öffnen synchronisieren
-            }
-            if (savedName) {
-                // FIX: Name existiert → nur Anzeige + Ändern-Link, kein Eingabefeld
-                nameArea.innerHTML = `
-                <p style="font-size:0.9rem;color:#888">
-                    Angemeldet als: <strong style="color:var(--accent)">${savedName}</strong>
-                    <span onclick="logout()" style="color:#c0392b;cursor:pointer;text-decoration:underline;margin-left:10px;font-size:0.85rem">Abmelden</span>
-                </p>`;
-            } else {
-                // Kein Name → Eingabefeld anzeigen
-                nameArea.innerHTML = `
-                    <p style="font-size:0.9rem;color:#888">Gib deinen Namen ein, um auf der Bestenliste zu erscheinen:</p>
-                    <div style="display:flex;gap:10px;justify-content:center">
-                        <input type="text" id="leaderboard-name-input" placeholder="Dein Name..." autocomplete="off" style="max-width:200px">
-                        <button id="leaderboard-save-btn" onclick="saveLeaderboardName()">Speichern</button>
-                    </div>`;
-            }
+    if (!currentUser) {
+        nameArea.style.display   = 'none';
+        nameArea.innerHTML       = '';
+        authPrompt.style.display = 'block';
+    } else {
+        authPrompt.style.display = 'none';
+        nameArea.style.display   = 'block';
+        const savedName = localStorage.getItem('leaderboardName');
+        if (savedName) {
+            pushLeaderboardEntry(savedName); 
         }
-
-        content.innerHTML = '<p style="color:#888;font-size:0.9rem">Lade...</p>';
-
-        try {
-            const { data, error } = await sb
-                .from('leaderboard')
-                .select('*')
-                .order('solved', { ascending: false })
-                .order('avg_hints', { ascending: true })
-                .limit(20);
-
-            if (error) throw error;
-
-            if (!data || data.length === 0) {
-                content.innerHTML = '<p style="color:#888;font-size:0.9rem">Noch keine Einträge.</p>';
-                return;
-            }
-
-            const myId = currentUser ? currentUser.id : null;
-            let html = `<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
-                <thead>
-                    <tr style="border-bottom:2px solid #eee">
-                        <th style="padding:8px;text-align:left;color:#888">#</th>
-                        <th style="padding:8px;text-align:left;color:#888">Name</th>
-                        <th style="padding:8px;text-align:center;color:#888">Gelöst</th>
-                        <th style="padding:8px;text-align:center;color:#888">Ø Hinweise</th>
-                        <th style="padding:8px;text-align:center;color:#888">🔥</th>
-                    </tr>
-                </thead><tbody>`;
-
-            data.forEach((row, i) => {
-                const isMe = row.user_id === myId;
-                html += `<tr style="${isMe ? 'background:#f0f7ff;font-weight:bold' : ''}border-bottom:1px solid #f0f0f0">
-                    <td style="padding:8px">${i + 1}</td>
-                    <td style="padding:8px">${row.name}${isMe ? ' (Du)' : ''}</td>
-                    <td style="padding:8px;text-align:center">${row.solved}</td>
-                    <td style="padding:8px;text-align:center">${row.avg_hints}</td>
-                    <td style="padding:8px;text-align:center">${row.streak}</td>
-                </tr>`;
-            });
-
-            html += '</tbody></table>';
-            content.innerHTML = html;
-
-        } catch(e) {
-            content.innerHTML = '<p style="color:#c0392b;font-size:0.9rem">Bestenliste konnte nicht geladen werden.</p>';
-            console.error('Leaderboard Ladefehler:', e);
+        if (savedName) {
+            nameArea.innerHTML = `
+            <p style="font-size:0.9rem;color:#888">
+                Angemeldet als: <strong style="color:var(--accent)">${savedName}</strong>
+                <span onclick="logout()" style="color:#c0392b;cursor:pointer;text-decoration:underline;margin-left:10px;font-size:0.85rem">Abmelden</span>
+            </p>`;
+        } else {
+            nameArea.innerHTML = `
+                <p style="font-size:0.9rem;color:#888">Gib deinen Namen ein, um auf der Bestenliste zu erscheinen:</p>
+                <div style="display:flex;gap:10px;justify-content:center">
+                    <input type="text" id="leaderboard-name-input" placeholder="Dein Name..." autocomplete="off" style="max-width:200px">
+                    <button id="leaderboard-save-btn" onclick="saveLeaderboardName()">Speichern</button>
+                </div>`;
         }
     }
+
+    content.innerHTML = '<p style="color:#888;font-size:0.9rem">Lade...</p>';
+
+    try {
+        const { data, error } = await sb
+            .from('leaderboard')
+            .select('*')
+            .order('solved', { ascending: false }) // Zuerst nach Gelöst sortieren (Höchste zuerst)
+            .order('avg_hints', { ascending: true }) // Bei Gleichstand: Weniger Hinweise sind besser
+            .limit(20);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            content.innerHTML = '<p style="color:#888;font-size:0.9rem">Noch keine Einträge.</p>';
+            return;
+        }
+
+        const myId = currentUser ? currentUser.id : null;
+        let html = `<table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+            <thead>
+                <tr style="border-bottom:2px solid #eee">
+                    <th style="padding:8px;text-align:left;color:#888">#</th>
+                    <th style="padding:8px;text-align:left;color:#888">Name</th>
+                    <th style="padding:8px;text-align:center;color:#888">Gespielt</th>
+                    <th style="padding:8px;text-align:center;color:#888">Gelöst</th>
+                    <th style="padding:8px;text-align:center;color:#888">Ø Hinweise</th>
+                    <th style="padding:8px;text-align:center;color:#888">🔥</th>
+                </tr>
+            </thead><tbody>`;
+
+        data.forEach((row, i) => {
+            const isMe = row.user_id === myId;
+            html += `<tr style="${isMe ? 'background:#f0f7ff;font-weight:bold' : ''}border-bottom:1px solid #f0f0f0">
+                <td style="padding:8px">${i + 1}</td>
+                <td style="padding:8px">${row.name}${isMe ? ' ⭐' : ''}</td>
+                <td style="padding:8px;text-align:center">${row.total || 0}</td>
+                <td style="padding:8px;text-align:center">${row.solved}</td>
+                <td style="padding:8px;text-align:center">${row.avg_hints}</td>
+                <td style="padding:8px;text-align:center">${row.streak}</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        content.innerHTML = html;
+
+    } catch(e) {
+        content.innerHTML = '<p style="color:#c0392b;font-size:0.9rem">Bestenliste konnte nicht geladen werden.</p>';
+        console.error('Leaderboard Ladefehler:', e);
+    }
+}
 
     // ===== INITIALISIERUNG =====
     checkUser().then(() => {
